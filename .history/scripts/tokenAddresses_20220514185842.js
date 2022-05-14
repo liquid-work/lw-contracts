@@ -17,7 +17,8 @@ const networkConfig = {
         fusdc: '0xbe49ac1EadAc65dccf204D4Df81d650B50122aB2',
         fusdcx: '0x0F1D7C55A2B133E000eA10EeC03c774e0d6796e8',
         ethx: '0xa623b2DD931C5162b7a0B25852f4024Db48bb1A0',
-        
+        superAccountabilityX: '0x919753ca7f9d9B24a93e4823B9b8cB657bA5e0b5',
+        superAccountabilityNFT: '0x1eD52D1aD1633EBdA246dF5f5E543a8300014535'
     },
     80001: {
         name: 'mumbai',
@@ -27,7 +28,8 @@ const networkConfig = {
         fdaix: '0x5D8B4C2554aeB7e86F387B4d6c00Ac33499Ed01f',
         fusdc: '0xbe49ac1EadAc65dccf204D4Df81d650B50122aB2',
         fusdcx: '0x42bb40bF79730451B11f6De1CbA222F17b87Afd7',
-        
+        superAccountabilityX: '0xCdd7bDdF25c18c3830a60b73b5BFc40Ee3E60088',
+        superAccountabilityNFT: '0xfB4979C9d002bfeB26E21012CaD954fCb3791022'
     },
     137: {
         name: 'polygon',
