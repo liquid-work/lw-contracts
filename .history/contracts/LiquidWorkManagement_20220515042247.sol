@@ -13,14 +13,13 @@ import {SuperAppBase} from "@superfluid-finance/ethereum-contracts/contracts/app
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
-contract SuperLiquidWork is SuperAppBase {
+contract SuperLiquidWork is SuperAppBase, Ownable {
 
     // sender of stream : LiquidWork 
     // receiver : Vault 
         
     // minimum entry to pay 
     uint constant entry = 10000000;
-    address owner;
 
     ISuperfluid private host; // host 
     IConstantFlowAgreementV1 private cfa; // type of agreement. 
@@ -101,7 +100,7 @@ contract SuperLiquidWork is SuperAppBase {
         IConstantFlowAgreementV1 _cfa,
         ISuperToken _acceptedToken
     ) {
-        owner = msg.sender;
+
         servicesCount = 0;
         host = _host;
         cfa = _cfa;
@@ -129,9 +128,11 @@ contract SuperLiquidWork is SuperAppBase {
         host.registerApp(configWord);
     }
 
-    modifier notLiquidWork {
+    address public owner; 
+
+    modifier notLiquidWork() {
         require(msg.sender != owner);
-        _;
+        _:
     }
 
 
@@ -167,7 +168,6 @@ contract SuperLiquidWork is SuperAppBase {
         servicesCount++; // so that no Service had id = 0
         Service memory newService = Service(
             _name,
-            _description,
             _serviceId,
             _sender,
             _receiver,
@@ -435,7 +435,7 @@ contract SuperLiquidWork is SuperAppBase {
             );
         } else if (services[serviceId].status == ServiceStatus.NOT_STARTED) {
             services[serviceId].status = ServiceStatus.ABANDONNED;
-            //Service(serviceId);
+            Service(serviceId);
             services[serviceId].totalAmountStreamed = 0;
             IERC20(acceptedToken).transfer(sender, amountToSend);
         }

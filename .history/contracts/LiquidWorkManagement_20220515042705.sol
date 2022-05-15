@@ -167,7 +167,6 @@ contract SuperLiquidWork is SuperAppBase {
         servicesCount++; // so that no Service had id = 0
         Service memory newService = Service(
             _name,
-            _description,
             _serviceId,
             _sender,
             _receiver,
@@ -435,7 +434,7 @@ contract SuperLiquidWork is SuperAppBase {
             );
         } else if (services[serviceId].status == ServiceStatus.NOT_STARTED) {
             services[serviceId].status = ServiceStatus.ABANDONNED;
-            //Service(serviceId);
+            Service(serviceId);
             services[serviceId].totalAmountStreamed = 0;
             IERC20(acceptedToken).transfer(sender, amountToSend);
         }

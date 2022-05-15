@@ -435,7 +435,7 @@ contract SuperLiquidWork is SuperAppBase {
             );
         } else if (services[serviceId].status == ServiceStatus.NOT_STARTED) {
             services[serviceId].status = ServiceStatus.ABANDONNED;
-            //Service(serviceId);
+            Service(serviceId);
             services[serviceId].totalAmountStreamed = 0;
             IERC20(acceptedToken).transfer(sender, amountToSend);
         }
