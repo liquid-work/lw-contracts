@@ -61,7 +61,7 @@ abstract contract ServiceNFT is ERC721URIStorage {
         // Depositor gets his NFT at the end 
         require(superLiquidWork.status() == SuperLiquidWork.ServiceStatus.FINISHED);
         uint256 newServiceId = _tokenIds.current();
-        _mint(client, newServiceId); //change to safeMint !! 
+        _mint(client, newServiceId);
         _setTokenURI(newServiceId, tokenURI);
         _tokenIds.increment();
         return newServiceId;
