@@ -52,12 +52,12 @@ abstract contract ServiceNFT is ERC721URIStorage {
     }
 
     modifier OnlyDepositor(uint256 _depositorId) {
-        require(superLiquidWork.depositors(_depositorId) != address(0));
         _;
     }
 
     //@notice Depositor can get his receipt as NFT minted 
-    function getNFT(address client, string memory tokenURI) public OnlyDepositor(43) returns (uint256) {
+    function getNFT(address client, string memory tokenURI, uint256 _depositorId) public returns (uint256) {
+        require(superLiquidWork.depositors(_depositorId) != address(0));
         // Depositor gets his NFT at the end 
         require(superLiquidWork.status() == SuperLiquidWork.ServiceStatus.FINISHED);
         uint256 newServiceId = _tokenIds.current();
