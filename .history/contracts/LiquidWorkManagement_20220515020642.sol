@@ -35,15 +35,6 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
         uint256 amount; 
     }
 
-    //we map each user to his receipt 
-    mapping(address => )
-
-    function getReceipt() external {
-            require(status = ServiceStatus.FINISHED); 
-            if ServiceNFT.isMinted[i] = true 
-        }
-    }
-
     // mappings 
     mapping (address => uint256) public senderToServiceId; // mapping tracking user recent service to serviceId 
     mapping (address => uint256) public depositorsToServiceId; // mapping each depositor to a ServiceId 
@@ -143,31 +134,17 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
         host.registerApp(configWord);
     }
 
-    modifier notLiquidWork() {
-        require(msg.sender != owner);
-    }
-
 
     /**************************************************************************
-    * LiquidWork Management Logic 
+    * Interaction between a Client and LiquidWork Logic
     *************************************************************************/
 
-    //@notice User makes deposit to the LiquidWork contract
-    function makeDeposit() public payable notLiquidWork {
+    //@notice Add the players to the lottery array
+    function makeDeposit() public payable {
+        require(msg.sender != owner()); // deposit should come from contract different than LiquidWork
         require(msg.value >= entry, "Please check our pricing");
-        depositors.push(payable(msg.sender));
+        .push(payable(msg.sender));
     }
-
-    //@notice Tracking the balance of the LiquidWork contract 
-
-
-
-
-
-
-
-
-
 
     /**************************************************************************
      * Superfluid Money Management Logic 

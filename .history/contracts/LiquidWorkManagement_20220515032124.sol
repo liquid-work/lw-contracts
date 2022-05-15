@@ -35,12 +35,14 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
         uint256 amount; 
     }
 
-    //we map each user to his receipt 
-    mapping(address => )
+
 
     function getReceipt() external {
+        // if the service provided to the user is finished 
+        for (uint256 i; i <= depositors.length; i++ ){
             require(status = ServiceStatus.FINISHED); 
-            if ServiceNFT.isMinted[i] = true 
+
+            if 
         }
     }
 

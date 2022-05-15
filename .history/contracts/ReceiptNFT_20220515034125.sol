@@ -19,7 +19,7 @@ contract ServiceNFT is ERC721URIStorage {
 
     // ERC721 to track Services in our LiquidWork. 
     // When one is mapped to a user it will be minted and sent to him. 
-    function getNFT(address client, string memory tokenURI) public returns (uint256) onlyDepositor {
+    function getNFT(address client, string memory tokenURI) public returns (uint256) only {
         uint256 newServiceId = _tokenIds.current();
         _mint(client, newServiceId);
         _setTokenURI(newServiceId, tokenURI);
