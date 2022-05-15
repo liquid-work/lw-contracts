@@ -27,8 +27,13 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
 
     uint256 private servicesCount; 
     Service[] public services; // array of services 
+    Deposits[] public deposits // array of deposits
     address[] public depositors; 
-    
+
+    struct Deposits {
+        address client;
+        uint256 amount; 
+    }
     // mappings 
     mapping (address => uint256) public senderToServiceId; // mapping tracking user recent service to serviceId 
     mapping (address => uint256) public depositorsToServiceId; // mapping each depositor to a ServiceId 
