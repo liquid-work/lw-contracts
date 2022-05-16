@@ -13,6 +13,7 @@ import {SuperAppBase} from "@superfluid-finance/ethereum-contracts/contracts/app
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {ISETHCustom} from "./ISETHCustom.sol";
 import {IMATICx} from "./IMATICx.sol";
 
 contract SuperLiquidWork is SuperAppBase {
@@ -89,7 +90,7 @@ contract SuperLiquidWork is SuperAppBase {
         if(to == liquidwork) return;
         (, int96 outFlowRate, , ) = _cfa.getFlow(_acceptedToken, liquidwork , to); 
         _deleteFlow(_sender, liquidwork);
-        emit noFunds();
+        emit event noFunds();
     }
 
 

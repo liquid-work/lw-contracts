@@ -13,7 +13,7 @@ import {SuperAppBase} from "@superfluid-finance/ethereum-contracts/contracts/app
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import {IMATICx} from "./IMATICx.sol";
+import {ISETHCustom} from "./ISETHCustom.sol"
 
 contract SuperLiquidWork is SuperAppBase {
     address owner;
@@ -23,14 +23,12 @@ contract SuperLiquidWork is SuperAppBase {
     ISuperToken private acceptedToken; 
 
     address liquidwork = "0x839B878873998F02cE2f5c6D78d1B0842e58F192";
-    address  MATICx = "0x96B82B65ACF7072eFEb00502F45757F254c2a0D4";
-
 
     address[] public users;
 
-    uint256 constant day = 3600 * 24; 
-    uint256 constant month = day * 30; 
-    uint256 constant year = month * 12; 
+    constant day = 3600 * 24; 
+    constant month = day * 30; 
+    constant year = month * 12; 
 
     struct Stream {
         bool active;
@@ -67,11 +65,6 @@ contract SuperLiquidWork is SuperAppBase {
      * Superfluid Money Management Logic
      *************************************************************************/
 
-    // @notice upgrading MATIC token using Interface IMATICx.sol 
-    function upgradeMATIC(uint256 _amount) external {
-        MATICx.upgradebyETH(); 
-    }
-
     // @notice
     function initInstance(
         address _sender,
@@ -89,7 +82,7 @@ contract SuperLiquidWork is SuperAppBase {
         if(to == liquidwork) return;
         (, int96 outFlowRate, , ) = _cfa.getFlow(_acceptedToken, liquidwork , to); 
         _deleteFlow(_sender, liquidwork);
-        emit noFunds();
+        emit event noFunds();
     }
 
 
