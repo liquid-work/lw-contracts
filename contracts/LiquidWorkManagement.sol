@@ -2,9 +2,9 @@
 pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
-//LiquidWork = middleman 
-// User interacts with LiquidWork not Superfluid 
-// LiquidWork interacts with Superfluid 
+//LiquidWork = middleman
+// User interacts with LiquidWork not Superfluid
+// LiquidWork interacts with Superfluid
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {ISuperfluid, ISuperToken, ISuperApp, ISuperAgreement, ContextDefinitions, SuperAppDefinitions} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
@@ -14,21 +14,16 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-
 contract SuperLiquidWork is SuperAppBase {
-
     address owner;
 
-    ISuperfluid private host; // host 
+    ISuperfluid private host; // host
     IConstantFlowAgreementV1 private cfa; // type of agreement
-    ISuperToken private acceptedToken; // address of token 
+    ISuperToken private acceptedToken; // address of token
 
-    address[] public users; 
+    address[] public users;
 
-    event ServiceCreated(
-        address _sender,  
-        int96 _flowRate
-    );
+    event ServiceCreated(address _sender, int96 _flowRate);
 
     event streamStoped(uint256 _serviceId);
     event streamStarted(uint256 _serviceId);
@@ -51,88 +46,20 @@ contract SuperLiquidWork is SuperAppBase {
         host.registerApp(configWord);
     }
 
-
     /**************************************************************************
-     * Superfluid Money Management Logic 
+     * Superfluid Money Management Logic
      *************************************************************************/
 
-    // @notice 
-    function deployInstance(address _sender, uint256 _usd) external {}
-
-
-    /// @dev function for user to abandon service, can only abandon if service is created
-    function abandonService(uint256 _serviceId) external onlySender(_serviceId) {
-        require(
-            services[_serviceId].status == ServiceStatus.STARTED,
-            "cant abandon now"
-        );
-        services[_serviceId].status = ServiceStatus.ABANDONNED;
-        emit ServiceAbandonned(_serviceId);
-        (uint256 timestamp, int96 flowRate, , ) = cfa.getFlow(
-            acceptedToken,
-            msg.sender,
-            address(this)
-        );
-        uint256 amountToSendBack = uint256(uint96(flowRate)) *
-            (block.timestamp - timestamp) +
-            services[_serviceId].totalAmountStreamed;
-        services[_serviceId].totalAmountStreamed = 0;
-        _deleteFlow(services[_serviceId].sender, address(this));
-        IERC20(acceptedToken).transfer(
-            services[_serviceId].receiver,
-            amountToSendBack
-        );
-    }
-
-    /// @dev function for receiver to expire a Service that reached expiration, sends money to receiver
-    function expireService(uint256 _serviceId) external onlyReceiver(_serviceId) {
-        require(
-            block.timestamp > services[_serviceId].expirationDate,
-            "Contract not expired yet expired"
-        );
-        require(
-            services[_serviceId].status == ServiceStatus.STARTED,
-            "Service cant be expired in current state"
-        );
-        services[_serviceId].status = ServiceStatus.EXPIRED;
-        emit ServiceExpired(_serviceId);
-        (uint256 timestamp, int96 flowRate, , ) = cfa.getFlow(
-            acceptedToken,
-            services[_serviceId].sender,
-            address(this)
-        );
-        uint256 amountToSendBack = uint256(uint96(flowRate)) *
-            (block.timestamp - timestamp) +
-            services[_serviceId].totalAmountStreamed;
-        services[_serviceId].totalAmountStreamed = 0;
-        _deleteFlow(services[_serviceId].sender, address(this));
-        IERC20(acceptedToken).transfer(
-            services[_serviceId].receiver,
-            amountToSendBack
-        );
-    }
-
-    /// helper to delete flow
-    function _deleteFlow(address _from, address _to) internal {
-        host.callAgreement(
-            cfa,
-            abi.encodeWithSelector(
-                cfa.deleteFlow.selector,
-                acceptedToken,
-                _from,
-                _to,
-                new bytes(0) // placeholder
-            ),
-            "0x"
-        );
-    }
-
-    /**************************************************************************
-     * Helpers functions
-     *************************************************************************/
-    /// show Service
-    function showService(uint256 _serviceId) public view returns (Service memory service) {
-        service = services[_serviceId];
+    // @notice
+    function deployInstance(
+        address _sender,
+        uint256 _usd,
+        uint256 timestamp
+    ) external {
+        // transform usd-matic
+        // transform matic to wei
+        // divide wei/(timestamp*1000) -> flowrate
+        // start stream use cfa
     }
 
     /**************************************************************************
@@ -176,34 +103,6 @@ contract SuperLiquidWork is SuperAppBase {
         newCtx = _ctx;
     }
 
-    function beforeAgreementUpdated(
-        ISuperToken _superToken,
-        address _agreementClass,
-        bytes32, /*agreementId*/
-        bytes calldata _agreementData, /*agreementData*/
-        bytes calldata /*ctx*/
-    )
-        external
-        view
-        virtual
-        override
-        onlyExpected(_superToken, _agreementClass)
-        onlyHost
-        returns (bytes memory cbdata)
-    {
-        // get the amount streamed by sender before the update
-        (address sender, ) = abi.decode(_agreementData, (address, address));
-        (uint256 timestamp, int96 flowRate, , ) = cfa.getFlow(
-            acceptedToken,
-            sender,
-            address(this)
-        );
-        uint256 updateAmount = uint256(uint96(flowRate)) *
-            (block.timestamp - timestamp);
-
-        cbdata = abi.encode(updateAmount);
-    }
-
     function afterAgreementUpdated(
         ISuperToken _superToken,
         address _agreementClass,
@@ -219,7 +118,6 @@ contract SuperLiquidWork is SuperAppBase {
         returns (bytes memory newCtx)
     {
         // Logic after stream updated
-        // update amount streamed by user
         (address sender, ) = abi.decode(_agreementData, (address, address));
         uint256 updateAmount = abi.decode(_cbdata, (uint256));
         (, int96 flowRate, , ) = cfa.getFlow(
@@ -227,49 +125,9 @@ contract SuperLiquidWork is SuperAppBase {
             sender,
             address(this)
         );
-        uint256 serviceId = senderToServiceId[sender];
-        // update amount streamed first
-        services[serviceId].totalAmountStreamed += updateAmount;
-        // check if stream_flowrate > flowrate and status not started => start Service
-        // check if new_flowrate < flowrate => Service abandonned and pay receiver
-        if (
-            flowRate >= services[serviceId].flowRate &&
-            services[serviceId].status == ServiceStatus.NOT_STARTED
-        ) {
-            services[serviceId].status = ServiceStatus.STARTED;
-            emit ServiceStarted(serviceId);
-        } else if (
-            flowRate < services[serviceId].flowRate &&
-            services[serviceId].status == ServiceStatus.STARTED
-        ) {
-            services[serviceId].status = ServiceStatus.ABANDONNED;
-            emit ServiceAbandonned(serviceId);
-            IERC20(acceptedToken).transfer(
-                services[serviceId].receiver,
-                services[serviceId].totalAmountStreamed
-            );
-            services[serviceId].totalAmountStreamed = 0;
-        }
+        // if sender no more funds -> emitEvent(no funds)
+        // if stream started ->
         newCtx = _ctx;
-    }
-
-    function beforeAgreementTerminated(
-        ISuperToken, /*superToken*/
-        address, /*agreementClass*/
-        bytes32, /*agreementId*/
-        bytes calldata _agreementData, /*agreementData*/
-        bytes calldata /*ctx*/
-    ) external view virtual override returns (bytes memory cbdata) {
-        // get the amount streamer by sender before the update
-        (address sender, ) = abi.decode(_agreementData, (address, address));
-        (uint256 timestamp, int96 flowRate, , ) = cfa.getFlow(
-            acceptedToken,
-            sender,
-            address(this)
-        );
-        uint256 updateAmount = uint256(uint96(flowRate)) *
-            (block.timestamp - timestamp);
-        cbdata = abi.encode(updateAmount);
     }
 
     function afterAgreementTerminated(
@@ -289,29 +147,24 @@ contract SuperLiquidWork is SuperAppBase {
             )
         ) return _ctx;
 
-        // depening on Service state send money to receiver or sender
-        // first update amount to send
-        (address sender, ) = abi.decode(_agreementData, (address, address));
-        uint256 serviceId = senderToServiceId[sender];
-        // update total amount streamed
-        services[serviceId].totalAmountStreamed += abi.decode(_cbdata, (uint256));
-        uint256 amountToSend = services[serviceId].totalAmountStreamed;
+        //emit stream stopped event
 
-        if (services[serviceId].status == ServiceStatus.STARTED) {
-            services[serviceId].status = ServiceStatus.ABANDONNED;
-            emit ServiceAbandonned(serviceId);
-            services[serviceId].totalAmountStreamed = 0;
-            IERC20(acceptedToken).transfer(
-                services[serviceId].receiver,
-                amountToSend
-            );
-        } else if (services[serviceId].status == ServiceStatus.NOT_STARTED) {
-            services[serviceId].status = ServiceStatus.ABANDONNED;
-            //Service(serviceId);
-            services[serviceId].totalAmountStreamed = 0;
-            IERC20(acceptedToken).transfer(sender, amountToSend);
-        }
         newCtx = _ctx;
+    }
+
+    /// helper to delete flow
+    function _deleteFlow(address _from, address _to) internal {
+        host.callAgreement(
+            cfa,
+            abi.encodeWithSelector(
+                cfa.deleteFlow.selector,
+                acceptedToken,
+                _from,
+                _to,
+                new bytes(0) // placeholder
+            ),
+            "0x"
+        );
     }
 
     modifier onlyHost() {
@@ -334,35 +187,51 @@ contract SuperLiquidWork is SuperAppBase {
         _;
     }
 
-
-
-modifier notLiquidWork {
+    modifier notLiquidWork() {
         require(msg.sender != owner);
         _;
     }
 
-modifier onlySender(uint256 _serviceId) {
-        require(services[_serviceId].sender == msg.sender, "Only sender Allowed");
+    modifier onlySender(uint256 _serviceId) {
+        require(
+            services[_serviceId].sender == msg.sender,
+            "Only sender Allowed"
+        );
         _;
     }
 
     modifier onlyReceiver(uint256 _serviceId) {
-        require(services[_serviceId].receiver == msg.sender, "Only receiver Allowed");
+        require(
+            services[_serviceId].receiver == msg.sender,
+            "Only receiver Allowed"
+        );
         _;
     }
 
+    /**************************************************************************
+     * Chainlink PriceFeed MATIC/USD
+     *************************************************************************/
 
-/**************************************************************************
-* Chainlink PriceFeed MATIC/USD
-*************************************************************************/
-
-function getLatestPrice() public view returns (int) {
+    function getLatestPrice() public view returns (int256) {
         (
-            /*uint80 roundID*/,
-            int price,
-            /*uint startedAt*/,
-            /*uint timeStamp*/,
-            /*uint80 answeredInRound*/
+            ,
+            /*uint80 roundID*/
+            int256 price, /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/
+            ,
+            ,
+
+        ) = priceFeed.latestRoundData();
+        return price;
+    }
+
+    function getLatestPrice2() public view returns (int256) {
+        (
+            ,
+            /*uint80 roundID*/
+            int256 price, /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/
+            ,
+            ,
+
         ) = priceFeed.latestRoundData();
         return price;
     }
