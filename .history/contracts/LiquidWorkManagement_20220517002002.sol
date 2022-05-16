@@ -80,6 +80,7 @@ contract SuperLiquidWork is SuperAppBase {
     ) internal {
         if(to == liquidwork) return;
         (, int96 outFlowRate, , ) = _cfa.getFlow(_acceptedToken, liquidwork , to); 
+
         _deleteFlow(_sender, liquidwork);
         emit event noFunds();
     }
@@ -271,8 +272,6 @@ contract SuperLiquidWork is SuperAppBase {
     {
         return _callAgreement(msg.sender, agreementClass, callData, userData);
     }
-
-    // DeleteFlow 
 
     function _deleteFlow(address from, address to) internal {
         _host.callAgreement(

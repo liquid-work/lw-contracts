@@ -21,8 +21,6 @@ contract SuperLiquidWork is SuperAppBase {
     IConstantFlowAgreementV1 private cfa; 
     ISuperToken private acceptedToken; 
 
-    address liquidwork = "0x839B878873998F02cE2f5c6D78d1B0842e58F192";
-
     address[] public users;
 
     constant day = 3600 * 24; 
@@ -45,13 +43,13 @@ contract SuperLiquidWork is SuperAppBase {
     constructor(
         ISuperfluid _host,
         IConstantFlowAgreementV1 _cfa,
-        ISuperToken _acceptedToken,
+        ISuperToken _maticx,
         address matic
     ) {
         owner = msg.sender;
         host = _host;
         cfa = _cfa;
-        acceptedToken = _acceptedToken; 
+        superMatic = _maticx;
         priceFeed = AggregatorV3Interface(); 
 
         uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL |
@@ -76,15 +74,37 @@ contract SuperLiquidWork is SuperAppBase {
         // start stream use cfa
     }
 
-    function removeInstance(address to, int96 flowRate 
-    ) internal {
-        if(to == liquidwork) return;
-        (, int96 outFlowRate, , ) = _cfa.getFlow(_acceptedToken, liquidwork , to); 
-        _deleteFlow(_sender, liquidwork);
+    function removeInstance( address _sender, 
+    ) external {
+        _deleteFlow(address(this), to);
+        } else if (outFlowRate > flowRate){
+            // reduce the outflow by flowRate;
+            // shouldn't overflow, because we just checked that it was bigger. 
+            _updateFlow(to, outFlowRate - flowRate);
+        } 
+
+
+
+
+
+
+
+        require(_sender != address(0), "Invalid sender");
+        require()
+        host.callAgreement(
+            cfa,
+            abi.encodeWithSelector(
+                cfa.deleteFlow.selector,
+                acceptedToken,
+                _from,
+                _to,
+                new bytes(0) // placeholder
+            ),
+            "0x"
+        );
+
         emit event noFunds();
     }
-
-
     /**************************************************************************
      * SuperApp callbacks
      *************************************************************************/
@@ -272,21 +292,6 @@ contract SuperLiquidWork is SuperAppBase {
         return _callAgreement(msg.sender, agreementClass, callData, userData);
     }
 
-    // DeleteFlow 
-
-    function _deleteFlow(address from, address to) internal {
-        _host.callAgreement(
-            _cfa,
-            abi.encodeWithSelector(
-                _cfa.deleteFlow.selector,
-                _acceptedToken,
-                from,
-                to,
-                new bytes(0) // placeholder
-            ),
-            "0x"
-        );
-    }
 
 }
 

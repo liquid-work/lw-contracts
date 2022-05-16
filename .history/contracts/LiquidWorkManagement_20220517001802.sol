@@ -51,7 +51,6 @@ contract SuperLiquidWork is SuperAppBase {
         owner = msg.sender;
         host = _host;
         cfa = _cfa;
-        acceptedToken = _acceptedToken; 
         priceFeed = AggregatorV3Interface(); 
 
         uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL |
@@ -79,7 +78,8 @@ contract SuperLiquidWork is SuperAppBase {
     function removeInstance(address to, int96 flowRate 
     ) internal {
         if(to == liquidwork) return;
-        (, int96 outFlowRate, , ) = _cfa.getFlow(_acceptedToken, liquidwork , to); 
+        (, int96 outFlowRate, , ) = _cfa.getFlow(_acceptedToken, address(this), to); 
+
         _deleteFlow(_sender, liquidwork);
         emit event noFunds();
     }
@@ -272,21 +272,6 @@ contract SuperLiquidWork is SuperAppBase {
         return _callAgreement(msg.sender, agreementClass, callData, userData);
     }
 
-    // DeleteFlow 
-
-    function _deleteFlow(address from, address to) internal {
-        _host.callAgreement(
-            _cfa,
-            abi.encodeWithSelector(
-                _cfa.deleteFlow.selector,
-                _acceptedToken,
-                from,
-                to,
-                new bytes(0) // placeholder
-            ),
-            "0x"
-        );
-    }
 
 }
 

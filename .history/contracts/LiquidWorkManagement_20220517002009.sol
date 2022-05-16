@@ -80,6 +80,7 @@ contract SuperLiquidWork is SuperAppBase {
     ) internal {
         if(to == liquidwork) return;
         (, int96 outFlowRate, , ) = _cfa.getFlow(_acceptedToken, liquidwork , to); 
+
         _deleteFlow(_sender, liquidwork);
         emit event noFunds();
     }

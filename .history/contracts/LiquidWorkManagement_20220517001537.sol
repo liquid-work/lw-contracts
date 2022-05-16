@@ -20,7 +20,6 @@ contract SuperLiquidWork is SuperAppBase {
     ISuperfluid private host; 
     IConstantFlowAgreementV1 private cfa; 
     ISuperToken private acceptedToken; 
-
     address liquidwork = "0x839B878873998F02cE2f5c6D78d1B0842e58F192";
 
     address[] public users;
@@ -45,13 +44,13 @@ contract SuperLiquidWork is SuperAppBase {
     constructor(
         ISuperfluid _host,
         IConstantFlowAgreementV1 _cfa,
-        ISuperToken _acceptedToken,
+        ISuperToken _maticx,
         address matic
     ) {
         owner = msg.sender;
         host = _host;
         cfa = _cfa;
-        acceptedToken = _acceptedToken; 
+        superMatic = _maticx;
         priceFeed = AggregatorV3Interface(); 
 
         uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL |
@@ -76,11 +75,10 @@ contract SuperLiquidWork is SuperAppBase {
         // start stream use cfa
     }
 
-    function removeInstance(address to, int96 flowRate 
+    function removeInstance( address _sender, address to, 
     ) internal {
-        if(to == liquidwork) return;
-        (, int96 outFlowRate, , ) = _cfa.getFlow(_acceptedToken, liquidwork , to); 
-        _deleteFlow(_sender, liquidwork);
+        if(to == ) return;
+        _deleteFlow(_sender, to);
         emit event noFunds();
     }
 
@@ -272,21 +270,6 @@ contract SuperLiquidWork is SuperAppBase {
         return _callAgreement(msg.sender, agreementClass, callData, userData);
     }
 
-    // DeleteFlow 
-
-    function _deleteFlow(address from, address to) internal {
-        _host.callAgreement(
-            _cfa,
-            abi.encodeWithSelector(
-                _cfa.deleteFlow.selector,
-                _acceptedToken,
-                from,
-                to,
-                new bytes(0) // placeholder
-            ),
-            "0x"
-        );
-    }
 
 }
 
