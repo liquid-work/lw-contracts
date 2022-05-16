@@ -51,7 +51,7 @@ contract SuperLiquidWork is SuperAppBase {
      *************************************************************************/
 
     // @notice
-    function deployInstance(
+    function initInstance(
         address _sender,
         uint256 _usd,
         uint256 timestamp
@@ -62,6 +62,11 @@ contract SuperLiquidWork is SuperAppBase {
         // start stream use cfa
     }
 
+    function removeInstance(
+        //do magic here
+    ) external {
+
+    }
     /**************************************************************************
      * SuperApp callbacks
      *************************************************************************/
