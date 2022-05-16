@@ -12,8 +12,6 @@ import {IConstantFlowAgreementV1} from "@superfluid-finance/ethereum-contracts/c
 import {SuperAppBase} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperAppBase.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-
 
 contract SuperLiquidWork is SuperAppBase {
 
@@ -37,13 +35,12 @@ contract SuperLiquidWork is SuperAppBase {
     constructor(
         ISuperfluid _host,
         IConstantFlowAgreementV1 _cfa,
-        ISuperToken _acceptedToken
+        ISuperToken _acceptedToken 
     ) {
         owner = msg.sender;
         host = _host;
         cfa = _cfa;
         acceptedToken = _acceptedToken;
-        priceFeed = AggregatorV3Interface();
 
         uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL |
             SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP; //Not using Before_Agreement callback
@@ -56,8 +53,10 @@ contract SuperLiquidWork is SuperAppBase {
      * Superfluid Money Management Logic 
      *************************************************************************/
 
-    // @notice 
-    function deployInstance(address _sender, uint256 _usd) external {}
+    /// @dev function for LiquidWork to create a custom service
+    function createService(address _sender, int96 _flowRate) external {
+       
+    }
 
 
     /// @dev function for user to abandon service, can only abandon if service is created
@@ -351,19 +350,4 @@ modifier onlySender(uint256 _serviceId) {
         _;
     }
 
-
-/**************************************************************************
-* Chainlink PriceFeed MATIC/USD
-*************************************************************************/
-
-function getLatestPrice() public view returns (int) {
-        (
-            /*uint80 roundID*/,
-            int price,
-            /*uint startedAt*/,
-            /*uint timeStamp*/,
-            /*uint80 answeredInRound*/
-        ) = priceFeed.latestRoundData();
-        return price;
-    }
 }

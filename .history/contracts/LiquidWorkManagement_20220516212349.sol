@@ -37,13 +37,12 @@ contract SuperLiquidWork is SuperAppBase {
     constructor(
         ISuperfluid _host,
         IConstantFlowAgreementV1 _cfa,
-        ISuperToken _acceptedToken
+        ISuperToken _acceptedToken 
     ) {
         owner = msg.sender;
         host = _host;
         cfa = _cfa;
         acceptedToken = _acceptedToken;
-        priceFeed = AggregatorV3Interface();
 
         uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL |
             SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP; //Not using Before_Agreement callback
@@ -57,7 +56,7 @@ contract SuperLiquidWork is SuperAppBase {
      *************************************************************************/
 
     // @notice 
-    function deployInstance(address _sender, uint256 _usd) external {}
+    function deployInstance(address _sender, int96 _flowRate) external {}
 
 
     /// @dev function for user to abandon service, can only abandon if service is created
@@ -356,14 +355,4 @@ modifier onlySender(uint256 _serviceId) {
 * Chainlink PriceFeed MATIC/USD
 *************************************************************************/
 
-function getLatestPrice() public view returns (int) {
-        (
-            /*uint80 roundID*/,
-            int price,
-            /*uint startedAt*/,
-            /*uint timeStamp*/,
-            /*uint80 answeredInRound*/
-        ) = priceFeed.latestRoundData();
-        return price;
-    }
 }

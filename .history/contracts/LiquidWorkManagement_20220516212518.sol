@@ -57,7 +57,7 @@ contract SuperLiquidWork is SuperAppBase {
      *************************************************************************/
 
     // @notice 
-    function deployInstance(address _sender, uint256 _usd) external {}
+    function deployInstance(address _sender, int96 _flowRate) external {}
 
 
     /// @dev function for user to abandon service, can only abandon if service is created
@@ -366,4 +366,5 @@ function getLatestPrice() public view returns (int) {
         ) = priceFeed.latestRoundData();
         return price;
     }
+
 }

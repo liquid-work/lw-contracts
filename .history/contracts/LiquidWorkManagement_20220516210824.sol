@@ -12,10 +12,9 @@ import {IConstantFlowAgreementV1} from "@superfluid-finance/ethereum-contracts/c
 import {SuperAppBase} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperAppBase.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-
 
 contract SuperLiquidWork is SuperAppBase {
+
 
     address owner;
 
@@ -25,25 +24,63 @@ contract SuperLiquidWork is SuperAppBase {
 
     address[] public users; 
 
+    enum ServiceStatus {
+        NOT_STARTED,
+        STARTED,
+        FINISHED,
+        ABANDONNED,
+        EXPIRED
+    }
+
+    ServiceStatus public status; 
+
     event ServiceCreated(
-        address _sender,  
-        int96 _flowRate
+        uint256 _serviceId,
+        address _sender,
+        address _receiver,
+        int96 _flowRate,
+        uint256 _expirationDate
     );
 
-    event streamStoped(uint256 _serviceId);
-    event streamStarted(uint256 _serviceId);
-    event noFunds(uint256 _serviceId);
+    event StreamStoped(uint256 _serviceId);
+    event StreamStarted(uint256 _serviceId);
+    event NoFunds(uint256 _serviceId);
+
+    modifier onlySender(uint256 _serviceId) {
+        require(services[_serviceId].sender == msg.sender, "Only sender Allowed");
+        _;
+    }
+
+    modifier onlyReceiver(uint256 _serviceId) {
+        require(services[_serviceId].receiver == msg.sender, "Only receiver Allowed");
+        _;
+    }
+
+    modifier noServiceStarted() {
+        // information about flow : getFlow 
+        (, int96 oldFlow, , ) = cfa.getFlow(
+            acceptedToken,
+            msg.sender, //LiquidWork 
+            address(this) //receiver 
+        );
+        uint256 serviceId = senderToServiceId[msg.sender];
+        if(serviceId > 0) {
+            require(services[serviceId].status != ServiceStatus.NOT_STARTED, 'You already started this Service');
+        }
+        require(oldFlow <= 0, "User already streaming");
+        _;
+    }
+
 
     constructor(
         ISuperfluid _host,
         IConstantFlowAgreementV1 _cfa,
-        ISuperToken _acceptedToken
+        ISuperToken _acceptedToken 
     ) {
         owner = msg.sender;
         host = _host;
         cfa = _cfa;
         acceptedToken = _acceptedToken;
-        priceFeed = AggregatorV3Interface();
 
         uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL |
             SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP; //Not using Before_Agreement callback
@@ -52,12 +89,58 @@ contract SuperLiquidWork is SuperAppBase {
     }
 
 
+
+    /**************************************************************************
+    * LiquidWork Management Logic 
+    *************************************************************************/
+
+    //@notice User makes deposit to the LiquidWork contract
+    function makeDeposit() public payable notLiquidWork {
+        require(msg.value >= entry, "Please check our pricing");
+        depositors.push(payable(msg.sender));
+    }
+
+    //@notice Tracking the balance of the LiquidWork contract 
+
+
+
+
+
+
+
+
+
+
     /**************************************************************************
      * Superfluid Money Management Logic 
      *************************************************************************/
 
-    // @notice 
-    function deployInstance(address _sender, uint256 _usd) external {}
+    /// @dev function for LiquidWork to create a custom service
+    function createService(string memory _name, string memory _description, uint256 _serviceId, address _sender, address _receiver, ServiceStatus _status, int96 _flowRate,  uint256 _expirationDate, uint256 _totalAmountStreamed) external noServiceStarted {
+        require(msg.sender != _receiver, "sender and receiver are the same");
+        require(_expirationDate > block.timestamp, "expiration date is past ");
+        servicesCount++; // so that no Service had id = 0
+        Service memory newService = Service(
+            _name,
+            _description,
+            _serviceId,
+            _sender,
+            _receiver,
+            _status,
+            _flowRate,
+            _expirationDate, 
+            _totalAmountStreamed
+        );
+        services.push(newService);
+        senderToServiceId[msg.sender] = servicesCount;
+        emit ServiceCreated(
+            servicesCount,
+            msg.sender,
+            _receiver,
+            _flowRate,
+            _expirationDate
+        );
+    }
 
 
     /// @dev function for user to abandon service, can only abandon if service is created
@@ -333,37 +416,10 @@ contract SuperLiquidWork is SuperAppBase {
         );
         _;
     }
-
+}
 
 
 modifier notLiquidWork {
         require(msg.sender != owner);
         _;
     }
-
-modifier onlySender(uint256 _serviceId) {
-        require(services[_serviceId].sender == msg.sender, "Only sender Allowed");
-        _;
-    }
-
-    modifier onlyReceiver(uint256 _serviceId) {
-        require(services[_serviceId].receiver == msg.sender, "Only receiver Allowed");
-        _;
-    }
-
-
-/**************************************************************************
-* Chainlink PriceFeed MATIC/USD
-*************************************************************************/
-
-function getLatestPrice() public view returns (int) {
-        (
-            /*uint80 roundID*/,
-            int price,
-            /*uint startedAt*/,
-            /*uint timeStamp*/,
-            /*uint80 answeredInRound*/
-        ) = priceFeed.latestRoundData();
-        return price;
-    }
-}
