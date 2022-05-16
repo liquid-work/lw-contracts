@@ -17,15 +17,11 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 contract SuperLiquidWork is SuperAppBase {
     address owner;
 
-    ISuperfluid private host; 
-    IConstantFlowAgreementV1 private cfa; 
-    ISuperToken private acceptedToken; 
+    ISuperfluid private host; // host
+    IConstantFlowAgreementV1 private cfa; // type of agreement
+    ISuperToken private acceptedToken; // address of token
 
     address[] public users;
-
-    constant day = 3600 * 24; 
-    constant month = day * 30; 
-    constant year = month * 12; 
 
     struct Stream {
         bool active;
@@ -39,18 +35,16 @@ contract SuperLiquidWork is SuperAppBase {
     event streamStarted(uint256 _serviceId);
     event noFunds(uint256 _serviceId);
 
-
     constructor(
         ISuperfluid _host,
         IConstantFlowAgreementV1 _cfa,
-        ISuperToken _maticx,
-        address matic
+        ISuperToken _acceptedToken
     ) {
         owner = msg.sender;
         host = _host;
         cfa = _cfa;
-        superMatic = _maticx;
-        priceFeed = AggregatorV3Interface(); 
+        acceptedToken = _acceptedToken;
+        priceFeed = AggregatorV3Interface();
 
         uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL |
             SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP; //Not using Before_Agreement callback
@@ -78,19 +72,10 @@ contract SuperLiquidWork is SuperAppBase {
     ) external {
         require(_sender != address(0), "Invalid sender");
         require()
-        host.callAgreement(
-            cfa,
-            abi.encodeWithSelector(
-                cfa.deleteFlow.selector,
-                acceptedToken,
-                _from,
-                _to,
-                new bytes(0) // placeholder
-            ),
-            "0x"
-        );
 
-        emit event noFunds();
+        Stream memory 
+
+        emit event noFunds(_serviceInstance, msg.sender);
     }
     /**************************************************************************
      * SuperApp callbacks
@@ -229,7 +214,7 @@ contract SuperLiquidWork is SuperAppBase {
 
     /**************************************************************************
      * Chainlink PriceFeed MATIC/USD
-    *************************************************************************/
+     *************************************************************************/
 
     function getLatestPrice() public view returns (int256) {
         (
@@ -254,31 +239,4 @@ contract SuperLiquidWork is SuperAppBase {
         ) = priceFeed.latestRoundData();
         return price;
     }
-
-    /**************************************************************************
-     * Helper functions 
-    *************************************************************************/
-
-    //TIME 
-
-    function getNow() public view  returns (uint256) {
-        // solhint-disable-next-line not-rely-on-time
-        return block.timestamp;
-    }
-
-    //PROXY 
-
-    function callAgreement(
-        ISuperAgreement agreementClass,
-        bytes memory callData,
-        bytes memory userData
-    )
-        external override
-        returns(bytes memory returnedData)
-    {
-        return _callAgreement(msg.sender, agreementClass, callData, userData);
-    }
-
-
 }
-

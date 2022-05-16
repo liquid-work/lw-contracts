@@ -23,6 +23,7 @@ contract SuperLiquidWork is SuperAppBase {
 
     address[] public users;
 
+    //constants 
     constant day = 3600 * 24; 
     constant month = day * 30; 
     constant year = month * 12; 
@@ -78,19 +79,10 @@ contract SuperLiquidWork is SuperAppBase {
     ) external {
         require(_sender != address(0), "Invalid sender");
         require()
-        host.callAgreement(
-            cfa,
-            abi.encodeWithSelector(
-                cfa.deleteFlow.selector,
-                acceptedToken,
-                _from,
-                _to,
-                new bytes(0) // placeholder
-            ),
-            "0x"
-        );
 
-        emit event noFunds();
+        Stream memory 
+
+        emit event noFunds(_serviceInstance, msg.sender);
     }
     /**************************************************************************
      * SuperApp callbacks

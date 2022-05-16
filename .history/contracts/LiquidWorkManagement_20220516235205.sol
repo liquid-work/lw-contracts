@@ -78,6 +78,7 @@ contract SuperLiquidWork is SuperAppBase {
     ) external {
         require(_sender != address(0), "Invalid sender");
         require()
+
         host.callAgreement(
             cfa,
             abi.encodeWithSelector(
@@ -90,7 +91,7 @@ contract SuperLiquidWork is SuperAppBase {
             "0x"
         );
 
-        emit event noFunds();
+        emit event noFunds(msg.sender);
     }
     /**************************************************************************
      * SuperApp callbacks

@@ -23,10 +23,6 @@ contract SuperLiquidWork is SuperAppBase {
 
     address[] public users;
 
-    constant day = 3600 * 24; 
-    constant month = day * 30; 
-    constant year = month * 12; 
-
     struct Stream {
         bool active;
         bytes ctx;
@@ -49,7 +45,7 @@ contract SuperLiquidWork is SuperAppBase {
         owner = msg.sender;
         host = _host;
         cfa = _cfa;
-        superMatic = _maticx;
+        matic = _matic;
         priceFeed = AggregatorV3Interface(); 
 
         uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL |
@@ -78,19 +74,10 @@ contract SuperLiquidWork is SuperAppBase {
     ) external {
         require(_sender != address(0), "Invalid sender");
         require()
-        host.callAgreement(
-            cfa,
-            abi.encodeWithSelector(
-                cfa.deleteFlow.selector,
-                acceptedToken,
-                _from,
-                _to,
-                new bytes(0) // placeholder
-            ),
-            "0x"
-        );
 
-        emit event noFunds();
+        Stream memory 
+
+        emit event noFunds(_serviceInstance, msg.sender);
     }
     /**************************************************************************
      * SuperApp callbacks
@@ -229,7 +216,7 @@ contract SuperLiquidWork is SuperAppBase {
 
     /**************************************************************************
      * Chainlink PriceFeed MATIC/USD
-    *************************************************************************/
+     *************************************************************************/
 
     function getLatestPrice() public view returns (int256) {
         (
@@ -254,31 +241,4 @@ contract SuperLiquidWork is SuperAppBase {
         ) = priceFeed.latestRoundData();
         return price;
     }
-
-    /**************************************************************************
-     * Helper functions 
-    *************************************************************************/
-
-    //TIME 
-
-    function getNow() public view  returns (uint256) {
-        // solhint-disable-next-line not-rely-on-time
-        return block.timestamp;
-    }
-
-    //PROXY 
-
-    function callAgreement(
-        ISuperAgreement agreementClass,
-        bytes memory callData,
-        bytes memory userData
-    )
-        external override
-        returns(bytes memory returnedData)
-    {
-        return _callAgreement(msg.sender, agreementClass, callData, userData);
-    }
-
-
 }
-
