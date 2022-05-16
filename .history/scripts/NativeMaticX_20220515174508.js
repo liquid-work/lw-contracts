@@ -5,7 +5,7 @@ const ISETHJSONABI = ISETHJSON.abi;
 
 
 /**************************************************************************
-* LOGIC WRAPPED
+* LOGIC WRAPPED MATIC
 *************************************************************************/
 
 async function MATICUpgrade(amt) {
