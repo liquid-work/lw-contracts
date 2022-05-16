@@ -67,7 +67,8 @@ contract SuperLiquidWork is SuperAppBase {
     /**************************************************************************
      * Superfluid Money Management Logic
      *************************************************************************/
-
+     
+    // @notice
     function initInstance(
         address _sender,
         uint256 _usd,

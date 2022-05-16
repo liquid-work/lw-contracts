@@ -22,8 +22,8 @@ contract SuperLiquidWork is SuperAppBase {
     IConstantFlowAgreementV1 private cfa; 
     ISuperToken private acceptedToken; 
 
-    address liquidwork = 0x839B878873998F02cE2f5c6D78d1B0842e58F192;
-    address  MATICx = 0x96B82B65ACF7072eFEb00502F45757F254c2a0D4;
+    address liquidwork = "0x839B878873998F02cE2f5c6D78d1B0842e58F192";
+    address  MATICx = "0x96B82B65ACF7072eFEb00502F45757F254c2a0D4";
 
 
     address[] public users;
@@ -44,7 +44,6 @@ contract SuperLiquidWork is SuperAppBase {
     event streamStarted(uint256 _serviceId);
     event noFunds(uint256 _serviceId);
 
-    AggregatorV3Interface internal priceFeed;
 
     constructor(
         ISuperfluid _host,
@@ -56,7 +55,7 @@ contract SuperLiquidWork is SuperAppBase {
         host = _host;
         cfa = _cfa;
         acceptedToken = _acceptedToken; 
-        priceFeed = AggregatorV3Interface(0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada); 
+        priceFeed = AggregatorV3Interface(); 
 
         uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL |
             SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP; //Not using Before_Agreement callback
@@ -68,6 +67,12 @@ contract SuperLiquidWork is SuperAppBase {
      * Superfluid Money Management Logic
      *************************************************************************/
 
+    // @notice upgrading MATIC token using Interface IMATICx.sol 
+    function upgradeMATIC(uint256 _amount) external {
+        MATICx.upgradebyETH(); 
+    }
+
+    // @notice
     function initInstance(
         address _sender,
         uint256 _usd,
@@ -79,12 +84,12 @@ contract SuperLiquidWork is SuperAppBase {
         // start stream use cfa
     }
 
-    function removeInstance(address _sender, address to, int96 flowRate 
+    function removeInstance(address to, int96 flowRate 
     ) internal {
         if(to == liquidwork) return;
-        (, int96 outFlowRate, , ) = cfa.getFlow(acceptedToken, liquidwork , to); 
+        (, int96 outFlowRate, , ) = _cfa.getFlow(_acceptedToken, liquidwork , to); 
         _deleteFlow(_sender, liquidwork);
-        emit noFunds(2);
+        emit noFunds();
     }
 
 
@@ -208,22 +213,24 @@ contract SuperLiquidWork is SuperAppBase {
     }
 
     modifier onlySender(uint256 _serviceId) {
+        require(
+            services[_serviceId].sender == msg.sender,
+            "Only sender Allowed"
+        );
         _;
     }
 
     modifier onlyReceiver(uint256 _serviceId) {
+        require(
+            services[_serviceId].receiver == msg.sender,
+            "Only receiver Allowed"
+        );
         _;
     }
 
     /**************************************************************************
      * Chainlink PriceFeed MATIC/USD
     *************************************************************************/
-
-    /**
-     * Network: Polygon Testnet (Mumbai)
-     * Aggregator: MATIC/USD
-     * Address: 0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada
-    */
 
     function getLatestPrice() public view returns (int256) {
         (
@@ -261,7 +268,7 @@ contract SuperLiquidWork is SuperAppBase {
     }
 
     //PROXY 
-    /*
+
     function callAgreement(
         ISuperAgreement agreementClass,
         bytes memory callData,
@@ -272,9 +279,22 @@ contract SuperLiquidWork is SuperAppBase {
     {
         return _callAgreement(msg.sender, agreementClass, callData, userData);
     }
-    */
 
-    
+    // DeleteFlow 
+
+    function _deleteFlow(address from, address to) internal {
+        _host.callAgreement(
+            _cfa,
+            abi.encodeWithSelector(
+                _cfa.deleteFlow.selector,
+                _acceptedToken,
+                from,
+                to,
+                new bytes(0) // placeholder
+            ),
+            "0x"
+        );
+    }
 
 }
 
