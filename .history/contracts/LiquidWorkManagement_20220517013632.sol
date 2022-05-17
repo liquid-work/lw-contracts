@@ -25,7 +25,8 @@ contract SuperLiquidWork is SuperAppBase {
     address  MATICx = 0x96B82B65ACF7072eFEb00502F45757F254c2a0D4;
 
     address[] public users;
-    address owner;
+     address owner;
+
 
     uint256 constant day = 3600 * 24; 
     uint256 constant month = day * 30; 
@@ -38,12 +39,12 @@ contract SuperLiquidWork is SuperAppBase {
     }
 
     event ServiceCreated(address _sender, int96 _flowRate);
+
     event streamStoped(uint256 _serviceId);
     event streamStarted(uint256 _serviceId);
     event noFunds(uint256 _serviceId);
 
     AggregatorV3Interface internal priceFeed;
-    AggregatorV3Interface internal priceFeed2;
 
     constructor(
         ISuperfluid _host,
@@ -55,8 +56,7 @@ contract SuperLiquidWork is SuperAppBase {
         host = _host;
         cfa = _cfa;
         acceptedToken = _acceptedToken; 
-        priceFeed = AggregatorV3Interface(0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada);  //MATIC/USD address 
-        priceFeed2 = AggregatorV3Interface(0xe699a85EA83Adad57F3510be8AcD9d37f9e9B5d4) ;  // MATIC/ETH
+        priceFeed = AggregatorV3Interface(0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada); 
 
         uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL |
             SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP; //Not using Before_Agreement callback
@@ -66,21 +66,13 @@ contract SuperLiquidWork is SuperAppBase {
 
     /**************************************************************************
      * Superfluid Money Management Logic
-    *************************************************************************/
+     *************************************************************************/
 
     function initInstance(
         address _sender,
-        uint256 _estimate,
+        uint256 _usd,
         uint256 timestamp
     ) external {
-        require(_sender != address(0), "Enter a valid address");
-        users.push(_sender);
-        uint rate = uint(getLatestPrice()); // getting price of USD IN MATIC. 
-        uint realRate = _estimate * rate ; // getting price estimate in MATIC. 
-        // TODO : code to wrap MATIC to MATICx
-        // TODO : make a call on agreement to start a stream with realRate / (day / month / year) [definded constants]
-
-
         // transform usd-matic
         // transform matic to wei
         // divide wei/(timestamp*1000) -> flowrate
@@ -88,7 +80,7 @@ contract SuperLiquidWork is SuperAppBase {
     }
 
     function removeInstance(address _sender, address to, int96 flowRate 
-    ) external {
+    ) internal {
         if(to == liquidwork) return;
         (, int96 outFlowRate, , ) = cfa.getFlow(acceptedToken, liquidwork , to); 
         _deleteFlow(_sender, liquidwork);
@@ -253,7 +245,7 @@ contract SuperLiquidWork is SuperAppBase {
             ,
             ,
 
-        ) = priceFeed2.latestRoundData();
+        ) = priceFeed.latestRoundData();
         return price;
     }
 
@@ -282,6 +274,7 @@ contract SuperLiquidWork is SuperAppBase {
     }
     */
 
+    
 
 }
 

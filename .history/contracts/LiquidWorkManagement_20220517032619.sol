@@ -77,10 +77,6 @@ contract SuperLiquidWork is SuperAppBase {
         users.push(_sender);
         uint rate = uint(getLatestPrice()); // getting price of USD IN MATIC. 
         uint realRate = _estimate * rate ; // getting price estimate in MATIC. 
-        // TODO : code to wrap MATIC to MATICx
-        // TODO : make a call on agreement to start a stream with realRate / (day / month / year) [definded constants]
-
-
         // transform usd-matic
         // transform matic to wei
         // divide wei/(timestamp*1000) -> flowrate

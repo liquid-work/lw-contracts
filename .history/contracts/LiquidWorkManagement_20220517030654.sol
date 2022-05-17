@@ -43,7 +43,6 @@ contract SuperLiquidWork is SuperAppBase {
     event noFunds(uint256 _serviceId);
 
     AggregatorV3Interface internal priceFeed;
-    AggregatorV3Interface internal priceFeed2;
 
     constructor(
         ISuperfluid _host,
@@ -56,7 +55,6 @@ contract SuperLiquidWork is SuperAppBase {
         cfa = _cfa;
         acceptedToken = _acceptedToken; 
         priceFeed = AggregatorV3Interface(0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada);  //MATIC/USD address 
-        priceFeed2 = AggregatorV3Interface(0xe699a85EA83Adad57F3510be8AcD9d37f9e9B5d4) ;  // MATIC/ETH
 
         uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL |
             SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP; //Not using Before_Agreement callback
@@ -70,17 +68,11 @@ contract SuperLiquidWork is SuperAppBase {
 
     function initInstance(
         address _sender,
-        uint256 _estimate,
+        uint256 _usd,
         uint256 timestamp
     ) external {
-        require(_sender != address(0), "Enter a valid address");
-        users.push(_sender);
-        uint rate = uint(getLatestPrice()); // getting price of USD IN MATIC. 
-        uint realRate = _estimate * rate ; // getting price estimate in MATIC. 
-        // TODO : code to wrap MATIC to MATICx
-        // TODO : make a call on agreement to start a stream with realRate / (day / month / year) [definded constants]
-
-
+        require(users[msg.sender]!= address(0), "Enter a real address");
+        
         // transform usd-matic
         // transform matic to wei
         // divide wei/(timestamp*1000) -> flowrate
@@ -253,7 +245,7 @@ contract SuperLiquidWork is SuperAppBase {
             ,
             ,
 
-        ) = priceFeed2.latestRoundData();
+        ) = priceFeed.latestRoundData();
         return price;
     }
 
