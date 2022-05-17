@@ -5,24 +5,22 @@ const { Framework } = require("@superfluid-finance/sdk-core");
 
 const { expect } = require("chai");
 const { ethers, web3 } = require("hardhat");
+const daiABI = require("./abi/fDAIABI");
 
-const SuperLiquidWork = artifacts.require("SuperLiquidWork");
 let accounts;
+let deployedLW;
+let sf;
+let dai;
+let daix;
+let superSigner;
 
 const errorHandler = (err) => {
   if (err) throw err;
 };
 
-describe("Testing Deployment", async () => {
-  let deployedLW;
-  let sf;
-  let dai;
-  let daix;
-  let superSigner;
-
-  before(async () => {
+describe("Testing Deployment", () => {
+  it("Loads network", async () => {
     accounts = await web3.eth.getAccounts();
-
     await deployFramework(errorHandler, {
       web3,
       from: accounts[0].address,
@@ -49,13 +47,16 @@ describe("Testing Deployment", async () => {
       signer: accounts[0],
       provider: web3,
     });
+
     daix = await sf.loadSuperToken("fDAIx");
-    let daiAddress = daix.underlyingToken.address;
-    // dai = new ethers.Contract(daiAddress, daiABI, accounts[0]);
+    const daiAddress = daix.underlyingToken.address;
+    console.log("daiAddress", daiAddress);
+    console.log(" accounts[0]", accounts[0]);
+
+    dai = new ethers.Contract(daiAddress, daiABI, accounts[0]);
   });
 
   it("Deploys SuperLiquidWork Contract", async () => {
-    console.log(sf.host.hostContract.address);
     const SuperLiquidWork = await ethers.getContractFactory("SuperLiquidWork");
     const superLiquidWork = await SuperLiquidWork.deploy(
       sf.host.hostContract.address
@@ -65,3 +66,54 @@ describe("Testing Deployment", async () => {
     deployedLW = superLiquidWork;
   });
 });
+
+// describe("Testing flows", async () => {
+//   before(async () => {
+// await dai
+//   .connect(accounts[0])
+//   .mint(accounts[0].address, ethers.utils.parseEther("1000"));
+
+// await dai
+//   .connect(accounts[0])
+//   .approve(daix.address, ethers.utils.parseEther("1000"));
+
+// const daixUpgradeOperation = daix.upgrade({
+//   amount: ethers.utils.parseEther("1000"),
+// });
+
+// await daixUpgradeOperation.exec(accounts[0]);
+
+//     const daiBal = await daix.balanceOf({
+//       account: accounts[0].address,
+//       providerOrSigner: accounts[0],
+//     });
+//     console.log("daix bal for acct 0: ", daiBal);
+//   });
+
+//   it("User can stream money to SuperLiquidWork", async () => {
+//     const flowRate = "100000000";
+//     const appInitialBalance = await daix.balanceOf({
+//       account: deployedLW.address,
+//       providerOrSigner: accounts[0],
+//     });
+//     const createFlowOperation = sf.cfaV1.createFlow({
+//       receiver: deployedLW.address,
+//       superToken: daix.address,
+//       flowRate: "100000000",
+//     });
+
+//     await createFlowOperation.exec(accounts[0]);
+
+//     const appFlowRate = await sf.cfaV1.getNetFlow({
+//       superToken: daix.address,
+//       account: deployedLW.address,
+//       providerOrSigner: superSigner,
+//     });
+//     const appBalance = await daix.balanceOf({
+//       account: deployedLW.address,
+//       providerOrSigner: accounts[0],
+//     });
+//     expect(appFlowRate).to.equal(flowRate);
+//     expect(appBalance > appInitialBalance);
+//   });
+// });
