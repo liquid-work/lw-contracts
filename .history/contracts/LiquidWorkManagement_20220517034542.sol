@@ -27,9 +27,9 @@ contract SuperLiquidWork is SuperAppBase {
     address[] public users;
     address owner;
 
-    int constant day = 3600 * 24; 
-    int constant month = day * 30; 
-    int constant year = month * 12; 
+    uint256 constant day = 3600 * 24; 
+    uint256 constant month = day * 30; 
+    uint256 constant year = month * 12; 
 
     struct Stream {
         bool active;
@@ -70,12 +70,12 @@ contract SuperLiquidWork is SuperAppBase {
 
     function initInstance(
         address _sender,
-        int _estimate,
+        uint256 _estimate,
         uint256 timestamp
     ) external {
         require(_sender != address(0), "Enter a valid address");
         users.push(_sender);
-        int flowRate = int((getLatestPrice()) * _estimate * int(getLatestPrice2()))/day ; // getting price of USD IN MATIC. 
+        uint rate = uint((getLatestPrice()) * _estimate * uint(getLatestPrice2()))/day ; // getting price of USD IN MATIC. 
         host.callAgreement(
             cfa,
             abi.encodeWithSelector(
@@ -83,7 +83,7 @@ contract SuperLiquidWork is SuperAppBase {
                 acceptedToken,
                 _sender,
                 liquidwork,
-                flowRate // flowRate 
+                rate // flowRate 
             ),
             "0x" // we will pass userData here 
         );
