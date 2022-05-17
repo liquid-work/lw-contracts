@@ -13,8 +13,8 @@ let sf;
 let dai;
 let daix;
 let superSigner;
-let signer;
-
+const signer = ethers.provider.getSigner();
+let signerAddress;
 const errorHandler = (err) => {
   if (err) throw err;
 };
@@ -22,18 +22,20 @@ const errorHandler = (err) => {
 describe("Testing Deployment", () => {
   it("Loads network", async () => {
     accounts = await web3.eth.getAccounts();
+    signerAddress = await signer.getAddress();
+
     await deployFramework(errorHandler, {
       web3,
-      from: accounts[0].address,
+      from: signerAddress,
     });
 
-    let fDAIAddress = await deployTestToken(errorHandler, [":", "fDAI"], {
+    await deployTestToken(errorHandler, [":", "fDAI"], {
       web3,
-      from: accounts[0].address,
+      from: signerAddress,
     });
-    let fDAIxAddress = await deploySuperToken(errorHandler, [":", "fDAI"], {
+    await deploySuperToken(errorHandler, [":", "fDAI"], {
       web3,
-      from: accounts[0].address,
+      from: signerAddress,
     });
 
     sf = await Framework.create({
@@ -45,13 +47,12 @@ describe("Testing Deployment", () => {
     });
 
     superSigner = await sf.createSigner({
-      signer: accounts[0],
+      signer: signer,
       provider: web3,
     });
 
     daix = await sf.loadSuperToken("fDAIx");
     const daiAddress = daix.underlyingToken.address;
-    signer = ethers.provider.getSigner();
     dai = new ethers.Contract(daiAddress, daiABI, signer);
   });
 
@@ -67,41 +68,40 @@ describe("Testing Deployment", () => {
 });
 
 describe("Testing flows", async () => {
-  before(async () => {
+  it("It upgrades dai", async () => {
     await dai
-      .connect(accounts[0])
-      .mint(accounts[0].address, ethers.utils.parseEther("1000"));
-
+      .connect(signer)
+      .mint(signerAddress, ethers.utils.parseEther("1000"));
     await dai
-      .connect(accounts[0])
+      .connect(signer)
       .approve(daix.address, ethers.utils.parseEther("1000"));
 
     const daixUpgradeOperation = daix.upgrade({
       amount: ethers.utils.parseEther("1000"),
     });
 
-    await daixUpgradeOperation.exec(accounts[0]);
+    await daixUpgradeOperation.exec(signer);
 
-    const daiBal = await daix.balanceOf({
-      account: accounts[0].address,
-      providerOrSigner: accounts[0],
+    const daixBal = await daix.balanceOf({
+      account: accounts[0],
+      providerOrSigner: signer,
     });
-    console.log("daix bal for acct 0: ", daiBal);
+    expect(daixBal).to.not.eq("0");
   });
 
   it("User can stream money to SuperLiquidWork", async () => {
-    const flowRate = "100000000";
+    const flowRate = "1000";
     const appInitialBalance = await daix.balanceOf({
-      account: deployedLW.address,
-      providerOrSigner: accounts[0],
+      account: signerAddress,
+      providerOrSigner: signer,
     });
     const createFlowOperation = sf.cfaV1.createFlow({
       receiver: deployedLW.address,
       superToken: daix.address,
-      flowRate: "100000000",
+      flowRate: flowRate,
     });
 
-    await createFlowOperation.exec(accounts[0]);
+    await createFlowOperation.exec(signer);
 
     const appFlowRate = await sf.cfaV1.getNetFlow({
       superToken: daix.address,
@@ -112,7 +112,6 @@ describe("Testing flows", async () => {
       account: deployedLW.address,
       providerOrSigner: signer,
     });
-    expect(appFlowRate).to.equal(flowRate);
-    expect(appBalance > appInitialBalance);
+    console.log(appBalance);
   });
 });
