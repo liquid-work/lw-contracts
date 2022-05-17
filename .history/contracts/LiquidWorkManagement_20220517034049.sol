@@ -75,18 +75,7 @@ contract SuperLiquidWork is SuperAppBase {
     ) external {
         require(_sender != address(0), "Enter a valid address");
         users.push(_sender);
-        uint rate = uint(getLatestPrice()) * _estimate * uint(getLatestPrice2()); // getting price of USD IN MATIC. 
-        host.callAgreement(
-            cfa,
-            abi.encodeWithSelector(
-                cfa.createFlow.selector,
-                acceptedToken,
-                _sender,
-                liquidwork,
-                new bytes(0) // placeholder
-            ),
-            "0x" // we will pass userData here 
-        );
+        uint rate = uint(getLatestPrice()) * estimate * uint(getLatestPrice2()); // getting price of USD IN MATIC. 
         // TODO : code to wrap MATIC to MATICx
         // TODO : make a call on agreement to start a stream with realRate / (day / month / year) [definded constants]
 
