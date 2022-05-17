@@ -1,8 +1,8 @@
 require("@nomiclabs/hardhat-truffle5");
+require("@nomiclabs/hardhat-ethers");
 require("dotenv").config();
 
 module.exports = {
-  defaultNetwork: "hardhat",
   networks: {
     polygon: {
       url: "process.env.POLYGON_NODE_URL",

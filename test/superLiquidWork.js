@@ -21,8 +21,6 @@ describe("Testing Deployment", async () => {
   let superSigner;
 
   before(async () => {
-    console.log("dsadsa");
-
     accounts = await web3.eth.getAccounts();
 
     await deployFramework(errorHandler, {
@@ -57,9 +55,11 @@ describe("Testing Deployment", async () => {
   });
 
   it("Deploys SuperLiquidWork Contract", async () => {
+    console.log(sf.host.hostContract.address);
     const SuperLiquidWork = await ethers.getContractFactory("SuperLiquidWork");
-    console.log("superLiquidWork:", superLiquidWork);
-    const superLiquidWork = await SuperLiquidWork.deploy();
+    const superLiquidWork = await SuperLiquidWork.deploy(
+      sf.host.hostContract.address
+    );
     await superLiquidWork.deployed();
     expect(superLiquidWork.address);
     deployedLW = superLiquidWork;
