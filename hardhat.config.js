@@ -1,5 +1,5 @@
+require("@nomiclabs/hardhat-truffle5");
 require("dotenv").config();
-require("@nomiclabs/hardhat-ethers");
 
 module.exports = {
   defaultNetwork: "hardhat",
