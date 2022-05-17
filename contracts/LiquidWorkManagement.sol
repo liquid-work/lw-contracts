@@ -84,7 +84,7 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
             string memory instanceId,
             uint256 flowrate
         ) = decodeData(_agreementData, _ctx);
-        emit agreementCreated(sender, instanceId, flowrate); // -> nodejs server listens and destroys infrastructure
+        emit agreementTerminated(sender, instanceId, flowrate); // -> nodejs server listens and destroys infrastructure
         return _ctx;
     }
 
