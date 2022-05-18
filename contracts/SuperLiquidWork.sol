@@ -33,6 +33,7 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
             SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP |
             SuperAppDefinitions.BEFORE_AGREEMENT_UPDATED_NOOP |
             SuperAppDefinitions.AFTER_AGREEMENT_UPDATED_NOOP |
+            SuperAppDefinitions.AFTER_AGREEMENT_CREATED_NOOP |
             SuperAppDefinitions.BEFORE_AGREEMENT_TERMINATED_NOOP;
 
         host.registerApp(configWord);
@@ -89,7 +90,7 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
     }
 
     function decodeData(bytes memory _agreementData, bytes memory _ctx)
-        internal
+        private
         returns (
             address sender,
             string memory instanceId,
