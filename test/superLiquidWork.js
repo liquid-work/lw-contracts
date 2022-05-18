@@ -7,6 +7,9 @@ const { expect } = require("chai");
 const { ethers, web3 } = require("hardhat");
 const daiABI = require("./abi/fDAIABI");
 
+const provider = web3;
+
+
 let accounts;
 let deployedLW;
 let sf;
@@ -24,15 +27,19 @@ describe("Testing Deployment", () => {
     accounts = await web3.eth.getAccounts();
     signerAddress = await signer.getAddress();
 
+    //deploy the framework
     await deployFramework(errorHandler, {
       web3,
       from: signerAddress,
     });
 
+    // deploy a fake erc20 token 
     await deployTestToken(errorHandler, [":", "fDAI"], {
       web3,
       from: signerAddress,
     });
+
+    
     await deploySuperToken(errorHandler, [":", "fDAI"], {
       web3,
       from: signerAddress,
@@ -40,7 +47,7 @@ describe("Testing Deployment", () => {
 
     sf = await Framework.create({
       networkName: "custom",
-      provider: web3,
+      provider: provider,
       dataMode: "WEB3_ONLY",
       resolverAddress: process.env.RESOLVER_ADDRESS,
       protocolReleaseVersion: "test",
@@ -48,21 +55,22 @@ describe("Testing Deployment", () => {
 
     superSigner = await sf.createSigner({
       signer: signer,
-      provider: web3,
+      provider: provider,
     });
 
     daix = await sf.loadSuperToken("fDAIx");
-    const daiAddress = daix.underlyingToken.address;
+    let daiAddress = daix.underlyingToken.address;
     dai = new ethers.Contract(daiAddress, daiABI, signer);
   });
 
   it("Deploys SuperLiquidWork Contract", async () => {
-    const SuperLiquidWork = await ethers.getContractFactory("SuperLiquidWork");
+    const SuperLiquidWork = await ethers.getContractFactory("SuperLiquidWork", signer);
     const superLiquidWork = await SuperLiquidWork.deploy(
       sf.host.hostContract.address
     );
     await superLiquidWork.deployed();
     expect(superLiquidWork.address);
+    console.log(superLiquidWork.address)
     deployedLW = superLiquidWork;
   });
 });
@@ -75,7 +83,7 @@ describe("Testing flows", async () => {
     await dai
       .connect(signer)
       .approve(daix.address, ethers.utils.parseEther("1000"));
-
+    
     const daixUpgradeOperation = daix.upgrade({
       amount: ethers.utils.parseEther("1000"),
     });
@@ -87,16 +95,19 @@ describe("Testing flows", async () => {
       providerOrSigner: signer,
     });
     expect(daixBal).to.not.eq("0");
+    console.log(daixBal)
   });
 
+  const addressMehdi = "0x839B878873998F02cE2f5c6D78d1B0842e58F192";
+
   it("User can stream money to SuperLiquidWork", async () => {
-    const flowRate = "1000";
+    const flowRate = 10;
     const appInitialBalance = await daix.balanceOf({
       account: signerAddress,
       providerOrSigner: signer,
     });
     const createFlowOperation = sf.cfaV1.createFlow({
-      receiver: deployedLW.address,
+      receiver: addressMehdi,
       superToken: daix.address,
       flowRate: flowRate,
     });
@@ -105,11 +116,11 @@ describe("Testing flows", async () => {
 
     const appFlowRate = await sf.cfaV1.getNetFlow({
       superToken: daix.address,
-      account: deployedLW.address,
+      account: addressMehdi,
       providerOrSigner: superSigner,
     });
     const appBalance = await daix.balanceOf({
-      account: deployedLW.address,
+      account: addressMehdi,
       providerOrSigner: signer,
     });
     console.log(appBalance);

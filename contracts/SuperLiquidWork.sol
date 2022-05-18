@@ -24,7 +24,7 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
         uint256 flowRate
     );
 
-    event noFunds(uint256 _serviceId);
+    event noFunds(address sender, string instanceId, uint256 flowRate);
 
     constructor(ISuperfluid _host) {
         host = _host;

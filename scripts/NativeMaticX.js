@@ -34,10 +34,6 @@ async function MATICUpgrade(amt) {
     });
 
 
-    // const maticx = await sf.loadSuperToken(
-    //     "0x96B82B65ACF7072eFEb00502F45757F254c2a0D4"
-    // );
-
     const maticxAddress = "0x96B82B65ACF7072eFEb00502F45757F254c2a0D4";
 
     const maticx = new ethers.Contract(maticxAddress, ISETHJSONABI, signer);

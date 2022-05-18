@@ -1,9 +1,9 @@
 // //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.11;
 
-// interface IMATICx {
-//     function upgradeByETH() external payable;
-// }
+interface IMATICx {
+    function upgradeByETH() external payable;
+}
 
 // // Should be fixed
 // abstract contract UpgradeMATIC is IMATICx {
