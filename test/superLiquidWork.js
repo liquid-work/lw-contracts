@@ -99,6 +99,9 @@ describe("Testing flows", async () => {
 
   it("User can stream money to SuperLiquidWork", async () => {
     const flowRate = "100000000";
+    const instanceId = "testInstanceId";
+    const userData = web3.eth.abi.encodeParameter("string", instanceId);
+
     const superTokenBalance = await daix.balanceOf({
       account: signerAddress,
       providerOrSigner: signer,
@@ -108,6 +111,7 @@ describe("Testing flows", async () => {
       receiver: deployedLW.address,
       superToken: daix.address,
       flowRate: flowRate,
+      userData,
     });
 
     const txn = await createFlowOperation.exec(signer);

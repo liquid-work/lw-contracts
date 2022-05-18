@@ -33,7 +33,6 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
             SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP |
             SuperAppDefinitions.BEFORE_AGREEMENT_UPDATED_NOOP |
             SuperAppDefinitions.AFTER_AGREEMENT_UPDATED_NOOP |
-            SuperAppDefinitions.AFTER_AGREEMENT_CREATED_NOOP |
             SuperAppDefinitions.BEFORE_AGREEMENT_TERMINATED_NOOP;
 
         host.registerApp(configWord);
@@ -57,13 +56,13 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
         onlyHost
         returns (bytes memory newCtx)
     {
+        newCtx = _ctx;
         (
             address sender,
             string memory instanceId,
             uint256 flowRate
         ) = decodeData(_agreementData, _ctx);
         emit agreementCreated(sender, instanceId, flowRate); // -> nodejs server listens and deploys infrastructure
-        return _ctx;
     }
 
     function afterAgreementTerminated(
@@ -80,13 +79,13 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
         onlyHost
         returns (bytes memory newCtx)
     {
+        newCtx = _ctx;
         (
             address sender,
             string memory instanceId,
             uint256 flowrate
         ) = decodeData(_agreementData, _ctx);
         emit agreementTerminated(sender, instanceId, flowrate); // -> nodejs server listens and destroys infrastructure
-        return _ctx;
     }
 
     function decodeData(bytes memory _agreementData, bytes memory _ctx)
@@ -99,18 +98,16 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
     {
         (address senderData, ) = abi.decode(_agreementData, (address, address));
         ISuperfluid.Context memory decompiledContext = host.decodeCtx(_ctx);
-        uint256 flowrate = abi.decode(
-            abi.encodePacked(decompiledContext.appAllowanceWanted),
-            (uint256)
-        );
 
+        uint256 flowrate = decompiledContext.appAllowanceWanted;
         string memory instanceIdData = abi.decode(
             decompiledContext.userData,
             (string)
         );
+
         instances[instanceIdData] = instanceFlowRate(senderData, flowRate);
 
-        return (senderData, instanceId, flowrate);
+        return (senderData, instanceIdData, flowrate);
     }
 
     modifier onlyExpected(ISuperToken _superToken, address _agreementClass) {
