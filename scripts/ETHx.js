@@ -1,58 +1,48 @@
 const { Framework } = require("@superfluid-finance/sdk-core");
-const { ethers } = require("hardhat");
 const ethxABI = require("../test/abi/ETHxABI")
+const { ethers, providers } = require("ethers");
+
 
 //where the Superfluid logic takes place
 async function ethUpgrade(amt) {
+  const provider = new providers.AlchemyProvider(
+    "rinkeby",
+    ALCHEMY_API_KEY_URL.process.env
+  );
+  const sf = await Framework.create({
+    networkName: "rinkeby",
+    provider: provider
+  });
 
-    const ALCHEMY_API_KEY_URL = process.env.ALCHEMY_API_KEY_URL;
+  const signer = sf.createSigner({
+    privateKey:
+      "5034f6fc81f0fb42429875413da341faf69888122913159b2aa15d3e98f37bb9",
+    provider: provider
+  });
 
-    const customHttpProvider = new ethers.providers.JsonRpcProvider(
-        ALCHEMY_API_KEY_URL
-    );
+  //ETHx address on kovan
+  //the below code will work on MATICx on mumbai/polygon as well
+  const ETHxAddress = "0xdd5462a7db7856c9128bc77bd65c2919ee23c6e1";
 
-    const sf = await Framework.create({
-        chainId: 4,
-        provider: customHttpProvider,
-        customSubgraphQueriesEndpoint: "",
-        dataMode: "WEB3_ONLY",
+  const ETHx = new ethers.Contract(ETHxAddress, ethxABI, provider);
+
+  try {
+    console.log(`upgrading ${amt} ETH to ETHx`);
+
+    const amtToUpgrade = ethers.utils.parseEther(amt.toString());
+    const reciept = await ETHx.connect(signer).upgradeByETH({
+      value: amtToUpgrade
     });
-
-    const signer = sf.createSigner({
-        privateKey: process.env.PRIVATE_KEY,
-        provider: customHttpProvider
-    });
-    console.log(signer);
-
-    //ETHx address on kovan
-    //the below code will work on MATICx on mumbai/polygon as well
-    const ETHx = "0xa623b2DD931C5162b7a0B25852f4024Db48bb1A0";
-
-    const ethX = new ethers.Contract(ETHx, ethxABI, customHttpProvider);
-    console.log(ETHx);
-
-    try {
-        console.log(`upgrading $${amt} DAI to daix`);
-        const amtToUpgrade = ethers.utils.parseEther(amt.toString());
-        const upgradeOperation = ethX.upgrade({
-            amount: amtToUpgrade.toString()
-        });
-        const upgradeTxn = await upgradeOperation.exec(signer);
-        await upgradeTxn.wait().then(function (tx) {
-            console.log(
-                `
-
-        Congrats - you've just upgraded DAI to daix!
+    await reciept.wait().then(function (tx) {
+      console.log(
+        `
+        Congrats - you've just upgraded ETH to ETHx!
       `
       );
     });
   } catch (error) {
     console.error(error);
   }
-
-   
-   
 }
 
 ethUpgrade(2);
-
