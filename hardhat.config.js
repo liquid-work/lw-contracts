@@ -1,19 +1,15 @@
+require("dotenv").config();
 require("@nomiclabs/hardhat-truffle5");
 require("@nomiclabs/hardhat-ethers");
-require("dotenv").config();
+
+const { ALCHEMY_API_URL_KEY, PRIVATE_KEY } = process.env;
 
 module.exports = {
   defaultNetwork: "hardhat",
   networks: {
-    polygon: {
-      url: "process.env.POLYGON_NODE_URL",
-      // accounts: [process.env.POLYGON_PRIVATE_KEY],
-      blockGasLimit: 20000000,
-      gasPrice: 35000000000, // 35 Gwei
-    },
-    hardhat: {
-      gas: 8000000,
-      gasPrice: 11e9,
+    mumbai: {
+      url: ALCHEMY_API_URL_KEY,
+      accounts: [`${PRIVATE_KEY}`],
     },
   },
   solidity: {
