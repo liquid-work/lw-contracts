@@ -5,8 +5,7 @@ const { Framework } = require("@superfluid-finance/sdk-core");
 
 const { expect } = require("chai");
 const { ethers, web3 } = require("hardhat");
-const daiABI = require("./abi/fDAIABI");
-
+const daiABI = require("../abi/fDAIABI");
 
 const provider = web3;
 
@@ -137,7 +136,5 @@ describe("Testing flows", async () => {
     console.log("senderFlowRate:", senderFlowRate);
     console.log("appBalance after stream started", appBalance);
     console.log("appBalance after stream terminated", appBalance);
-
-  }); 
+  });
 });
-

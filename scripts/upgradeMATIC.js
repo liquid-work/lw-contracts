@@ -1,6 +1,6 @@
 const { Framework } = require("@superfluid-finance/sdk-core");
 const { ethers } = require("ethers");
-const MATICXABI = require("../test/abi/MATICX");
+const MATICXABI = require("../abi/MATICX");
 
 const {
   PRIVATE_KEY,
