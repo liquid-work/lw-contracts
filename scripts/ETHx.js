@@ -12,7 +12,7 @@ async function ethUpgrade(amt) {
     );
 
     const sf = await Framework.create({
-        chainId: 80001,
+        chainId: 4,
         provider: customHttpProvider,
         customSubgraphQueriesEndpoint: "",
         dataMode: "WEB3_ONLY",
@@ -22,18 +22,19 @@ async function ethUpgrade(amt) {
         privateKey: process.env.PRIVATE_KEY,
         provider: customHttpProvider
     });
+    console.log(signer);
 
     //ETHx address on kovan
     //the below code will work on MATICx on mumbai/polygon as well
-    const fDAIx = "0x5D8B4C2554aeB7e86F387B4d6c00Ac33499Ed01f";
+    const ETHx = "0xa623b2DD931C5162b7a0B25852f4024Db48bb1A0";
 
-    const ETHx = new ethers.Contract(fDAIx, ethxABI, customHttpProvider);
+    const ethX = new ethers.Contract(ETHx, ethxABI, customHttpProvider);
     console.log(ETHx);
 
     try {
         console.log(`upgrading $${amt} DAI to daix`);
         const amtToUpgrade = ethers.utils.parseEther(amt.toString());
-        const upgradeOperation = ETHx.upgrade({
+        const upgradeOperation = ethX.upgrade({
             amount: amtToUpgrade.toString()
         });
         const upgradeTxn = await upgradeOperation.exec(signer);

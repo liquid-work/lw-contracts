@@ -1,5 +1,6 @@
 const { Framework } = require("@superfluid-finance/sdk-core");
 const { ethers } = require("hardhat");
+const MATICXABI = require("../test/abi/MATICX");
 
 
 async function MATICUpgrade(amt) {
@@ -23,10 +24,11 @@ async function MATICUpgrade(amt) {
             process.env.PRIVATE_KEY,
         provider: httpProvider,
     });
+    console.log(signer);
 
    
     const maticxAddress = 0x96B82B65ACF7072eFEb00502F45757F254c2a0D4;
-    maticx = new ethers.Contract(maticxAddress, MATICxABI , signer);
+    maticx = new ethers.Contract(maticxAddress, MATICXABI, signer);
 
     //maticx = await Framework.loadNativeAssetSuperToken("MATICx")
 
@@ -54,4 +56,4 @@ async function MATICUpgrade(amt) {
   }
 }
 
-MATICUpgrade(20);
+MATICUpgrade(0.1);
