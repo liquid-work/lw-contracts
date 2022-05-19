@@ -1,14 +1,14 @@
 const networkConfig = {
-  31337: {
-    name: "localhost",
+  hardhat: {
+    chainId: 31337,
     host: "0x22ff293e14F1EC3A09B137e9e06084AFd63adDF9",
     cfa: "0xEd6BcbF6907D4feEEe8a8875543249bEa9D308E8",
     fdai: "0x88271d333C72e51516B67f5567c728E702b3eeE8",
     fdaix: "0xF2d68898557cCb2Cf4C10c3Ef2B034b2a69DAD00",
     ethx: "0x5943F705aBb6834Cad767e6E4bB258Bc48D9C947",
   },
-  4: {
-    name: "rinkeby",
+  rinkeby: {
+    chainId: 4,
     host: "0xeD5B5b32110c3Ded02a07c8b8e97513FAfb883B6",
     cfa: "0xF4C5310E51F6079F601a5fb7120bC72a70b96e2A",
     fdai: "0x15F0Ca26781C3852f8166eD2ebce5D18265cceb7",
@@ -37,8 +37,8 @@ const networkConfig = {
     usdcx: "0xCAa7349CEA390F89641fe306D93591f87595dc1F",
     ethx: "0x27e1e4E6BC79D93032abef01025811B7E4727e85",
   },
-  5: {
-    name: "goerli",
+  goerli: {
+    chainId: 5,
     host: "0x22ff293e14F1EC3A09B137e9e06084AFd63adDF9",
     cfa: "0xEd6BcbF6907D4feEEe8a8875543249bEa9D308E8",
     fdai: "0x88271d333C72e51516B67f5567c728E702b3eeE8",
