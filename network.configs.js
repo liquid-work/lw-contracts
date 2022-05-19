@@ -17,8 +17,8 @@ const networkConfig = {
     fusdcx: "0x0F1D7C55A2B133E000eA10EeC03c774e0d6796e8",
     ethx: "0xa623b2DD931C5162b7a0B25852f4024Db48bb1A0",
   },
-  80001: {
-    name: "mumbai",
+  mumbai: {
+    chainId: 80001,
     host: "0xEB796bdb90fFA0f28255275e16936D25d3418603",
     cfa: "​​0x49e565Ed1bdc17F3d220f72DF0857C26FA83F873",
     fdai: "0x15F0Ca26781C3852f8166eD2ebce5D18265cceb7",
@@ -26,7 +26,8 @@ const networkConfig = {
     fusdc: "0xbe49ac1EadAc65dccf204D4Df81d650B50122aB2",
     fusdcx: "0x42bb40bF79730451B11f6De1CbA222F17b87Afd7",
   },
-  137: {
+  polygon: {
+    chainId: 137,
     name: "polygon",
     host: "0x3E14dC1b13c488a8d5D310918780c983bD5982E7",
     cfa: "0x6EeE6060f715257b970700bc2656De21dEdF074C",
@@ -46,4 +47,4 @@ const networkConfig = {
   },
 };
 
-module.exports = { networkConfig };
+module.exports = networkConfig;

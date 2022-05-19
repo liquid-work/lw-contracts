@@ -1,27 +1,23 @@
 const { Framework } = require("@superfluid-finance/sdk-core");
 const { ethers } = require("ethers");
+const networkConfigs = require("../network.configs");
 const MATICXABI = require("../abi/MATICX");
 
-const {
-  PRIVATE_KEY,
-  ALCHEMY_API_URL_KEY,
-  MATICX_ADDRESS,
-  CHAIN_ID,
-  NETWORK_NAME,
-} = process.env;
+const { PRIVATE_KEY, ALCHEMY_API_URL_KEY, MATICX_ADDRESS, NETWORK_NAME } =
+  process.env;
 
 async function upgradeMATIC(amount) {
   const ethersProvider = new ethers.providers.JsonRpcProvider(
     ALCHEMY_API_URL_KEY,
     {
       name: NETWORK_NAME,
-      chainId: Number(CHAIN_ID),
+      chainId: networkConfigs[NETWORK_NAME],
     }
   );
   const sf = await Framework.create({
     networkName: NETWORK_NAME,
     provider: ethersProvider,
-    chainId: Number(CHAIN_ID),
+    chainId: networkConfigs[NETWORK_NAME],
   });
 
   const signer = sf.createSigner({
