@@ -56,12 +56,14 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
         onlyHost
         returns (bytes memory newCtx)
     {
-        newCtx = _ctx;
         (
             address sender,
             string memory instanceId,
             uint256 flowRate
         ) = decodeData(_agreementData, _ctx);
+        
+        newCtx = _ctx;
+
         emit agreementCreated(sender, instanceId, flowRate); // -> nodejs server listens and deploys infrastructure
     }
 
@@ -79,12 +81,13 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
         onlyHost
         returns (bytes memory newCtx)
     {
-        newCtx = _ctx;
         (
             address sender,
             string memory instanceId,
             uint256 flowrate
         ) = decodeData(_agreementData, _ctx);
+        
+        newCtx = _ctx;
         emit agreementTerminated(sender, instanceId, flowrate); // -> nodejs server listens and destroys infrastructure
     }
 

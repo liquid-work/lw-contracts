@@ -7,6 +7,7 @@ const { expect } = require("chai");
 const { ethers, web3 } = require("hardhat");
 const daiABI = require("./abi/fDAIABI");
 
+
 const provider = web3;
 
 let accounts;
@@ -135,5 +136,7 @@ describe("Testing flows", async () => {
     console.log("appFlowRate:", appFlowRate);
     console.log("senderFlowRate:", senderFlowRate);
     console.log("appBalance after stream started", appBalance);
-  });
+    console.log("appBalance after stream terminated", appBalance);
+
+  }); 
 });

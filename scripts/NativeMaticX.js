@@ -1,23 +1,15 @@
-import { Framework } from "@superfluid-finance/sdk-core";
-import { ethers } from "ethers";
-const ISETHJSON = require("../artifacts/@superfluid-finance/ethereum-contracts/contracts/interfaces/tokens/ISETH.sol/ISETH.json");
-const ISETHJSONABI = ISETHJSON.abi;
+const { Framework } = require("@superfluid-finance/sdk-core");
+const { ethers } = require("hardhat");
 
-
-/**************************************************************************
-* LOGIC WRAPPED
-*************************************************************************/
+const MATICxABI = require("../test/abi/ISETHABI");
 
 async function MATICUpgrade(amt) {
 
     const ALCHEMY_API_KEY_URL = process.env.ALCHEMY_API_KEY_URL;
 
-    // let accounts = await ethers.getSigners();
-
     const httpProvider = new ethers.providers.JsonRpcProvider(
         ALCHEMY_API_KEY_URL
     );
-
 
     const sf = await Framework.create({
         chainId: 80001,
@@ -26,19 +18,19 @@ async function MATICUpgrade(amt) {
         dataMode: "WEB3_ONLY",
     });
 
-
     const signer = sf.createSigner({
-        privateKey:
+        privateKey: 
             process.env.PRIVATE_KEY,
         provider: httpProvider,
     });
 
+   
+    const maticxAddress = 0x96B82B65ACF7072eFEb00502F45757F254c2a0D4;
+    maticx = new ethers.Contract(maticxAddress, MATICxABI , signer);
 
-    const maticxAddress = "0x96B82B65ACF7072eFEb00502F45757F254c2a0D4";
+    //maticx = await Framework.loadNativeAssetSuperToken("MATICx")
 
-    const maticx = new ethers.Contract(maticxAddress, ISETHJSONABI, signer);
-    await maticx.connect(signer).upgradeByETH({ value: amt });
-
+    await maticx.upgradeByETH({value: amt})
 
     console.log(maticx);
 
