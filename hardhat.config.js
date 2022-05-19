@@ -5,7 +5,7 @@ require("@nomiclabs/hardhat-ethers");
 const { ALCHEMY_API_URL_KEY, PRIVATE_KEY } = process.env;
 
 module.exports = {
-  defaultNetwork: "mumbai",
+  defaultNetwork: "hardhat",
   networks: {
     mumbai: {
       url: ALCHEMY_API_URL_KEY,
