@@ -1,6 +1,6 @@
 const { Framework } = require("@superfluid-finance/sdk-core");
 const { ethers } = require("hardhat");
-const ethxABI = require("./config")
+const ethxABI = require("../test/abi/ETHxABI")
 
 //where the Superfluid logic takes place
 async function ethUpgrade(amt) {
@@ -16,14 +16,13 @@ async function ethUpgrade(amt) {
     });
 
     const signer = sf.createSigner({
-        privateKey:
-        "0xd2ebfb1517ee73c4bd3d209530a7e1c25352542843077109ae77a2c0213375f1",
+        privateKey: process.env.PRIVATE_KEY,
         provider: customHttpProvider
     });
 
     //ETHx address on kovan
     //the below code will work on MATICx on mumbai/polygon as well
-    const ETHxAddress = "0xdd5462a7db7856c9128bc77bd65c2919ee23c6e1";
+    const ETHxAddress = 0xdd5462a7db7856c9128bc77bd65c2919ee23c6e1;
 
     const ETHx = new ethers.Contract(ETHxAddress, ethxABI, customHttpProvider);
 
@@ -37,15 +36,13 @@ async function ethUpgrade(amt) {
         await upgradeTxn.wait().then(function (tx) {
             console.log(
                 `
-        Congrats - you've just upgraded MATIC to maticx!
+        Congrats - you've just upgraded ETH to ETHx!
       `
             );
         });
     } catch (error) {
         console.error(error);
     }
-    
-
     
 };
 
