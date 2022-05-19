@@ -13,6 +13,7 @@ const deploy = async () => {
     `SuperLiquidWork Smart Contract ${superLiquidWork.address} deployed on ${NETWORK_NAME}`
   );
 };
+
 try {
   deploy();
 } catch (error) {
