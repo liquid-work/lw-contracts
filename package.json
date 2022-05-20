@@ -35,6 +35,7 @@
     "prettier-plugin-solidity": "^1.0.0-beta.19"
   },
   "dependencies": {
+    "@chainlink/contracts": "^0.4.1",
     "@truffle/contract": "^4.5.10"
   }
 }

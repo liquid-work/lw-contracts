@@ -51,6 +51,7 @@ describe("Testing Deployment", () => {
       resolverAddress: process.env.RESOLVER_ADDRESS,
       protocolReleaseVersion: "test",
     });
+    console.log(sf);
 
     superSigner = await sf.createSigner({
       signer: signer,
