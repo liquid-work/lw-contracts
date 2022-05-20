@@ -11,6 +11,10 @@ module.exports = {
       url: ALCHEMY_API_URL_KEY,
       accounts: [`${PRIVATE_KEY}`],
     },
+    polygon: {
+      url: ALCHEMY_API_URL_KEY,
+      accounts: [`${PRIVATE_KEY}`],
+    },
   },
   solidity: {
     version: "0.8.7",
