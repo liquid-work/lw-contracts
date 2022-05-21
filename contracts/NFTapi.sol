@@ -8,8 +8,6 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 
-
-
 contract APIExperience is ChainlinkClient, ERC721URIStorage {
     using Chainlink for Chainlink.Request;
 
@@ -82,7 +80,7 @@ contract APIExperience is ChainlinkClient, ERC721URIStorage {
         return newItemId;
     }
 
-    function requesting(string memory uri) public returns (bytes32 requestId)
+    function requesting(string memory uri) public returns (bytes32)
     {
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
         
@@ -92,11 +90,11 @@ contract APIExperience is ChainlinkClient, ERC721URIStorage {
         request.addInt("times", timesAmount);
         
         // Sends the request
-        sendChainlinkRequestTo(oracle, request, fee);
-        return requestId = sendChainlinkRequest(request, fee);
+        bytes32 requestId = sendChainlinkRequestTo(oracle, request, fee);
         requestToURI[requestId] = uri;
         requestToSender[requestId] = msg.sender; 
         counter++;
+        return requestId;
     }
 
     function fulfill(bytes32 _requestId, uint256 _realTime) public recordChainlinkFulfillment(_requestId)
@@ -135,9 +133,7 @@ contract APIExperience is ChainlinkClient, ERC721URIStorage {
     
     }
 
-    function getRealTime(uint256 _realTime) public returns(uint256){
-        realTime = _realTime ;
-    }
+}
 
 
 
@@ -146,5 +142,3 @@ contract APIExperience is ChainlinkClient, ERC721URIStorage {
 
 
   
-}
-
