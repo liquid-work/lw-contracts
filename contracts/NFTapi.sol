@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 
-contract APIExperience is ChainlinkClient, ERC721URIStorage {
+contract APIStreamingProcess is ChainlinkClient, ERC721URIStorage {
     using Chainlink for Chainlink.Request;
 
     uint256 public realTime; 
@@ -17,7 +17,7 @@ contract APIExperience is ChainlinkClient, ERC721URIStorage {
     bytes32 private jobId;
     uint256 private fee;
 
-    struct UserExperience {
+    struct UserStreamingProcess {
         string uri ;
         address streamer;
         uint256 startingTime;
@@ -27,10 +27,10 @@ contract APIExperience is ChainlinkClient, ERC721URIStorage {
     mapping(bytes32 => string) requestToURI ; 
     mapping(bytes32 => address ) requestToSender;
 
-    UserExperience[] public experiences;
+    UserStreamingProcess[] public StreamingProcesss;
 
     // When TimeLeft == 0 emit this Event
-    event ExperienceFinished(bytes32 firstName, bytes32 lastName, uint256 TimeLeft);
+    event StreamingProcessFinished(bytes32 firstName, bytes32 lastName, uint256 TimeLeft);
 
     /**
      * Network: Kovan
@@ -39,7 +39,7 @@ contract APIExperience is ChainlinkClient, ERC721URIStorage {
      * Job ID: d5270d1c311941d0b08bead21fea7747
      * Fee: 0.1 LINK
      */
-    constructor() ERC721("Experience", "EXP") {
+    constructor() ERC721("StreamingProcess", "SP") {
         setPublicChainlinkToken();
         oracle = 0xc57B33452b4F7BB189bB5AfaE9cc4aBa1f7a4FD8;
         jobId = "d5270d1c311941d0b08bead21fea7747";
@@ -99,7 +99,7 @@ contract APIExperience is ChainlinkClient, ERC721URIStorage {
 
     function fulfill(bytes32 _requestId, uint256 _realTime) public recordChainlinkFulfillment(_requestId)
     {
-        uint256 newId = experiences.length;
+        uint256 newId = StreamingProcesss.length;
         uint256 startingTime;
         uint256 endTime;
         string memory uri;
@@ -107,8 +107,8 @@ contract APIExperience is ChainlinkClient, ERC721URIStorage {
         if (counter==1){
             realTime = 0; 
             uint256 startingTime = realTime;
-            experiences.push(
-                UserExperience(
+            StreamingProcesss.push(
+                UserStreamingProcess(
                     requestToURI[_requestId] = uri,
                     msg.sender,
                     startingTime,
@@ -121,8 +121,8 @@ contract APIExperience is ChainlinkClient, ERC721URIStorage {
         }else{
             realTime = _realTime;
             uint256 endTime = realTime;
-            experiences.push(
-                UserExperience(
+            StreamingProcesss.push(
+                UserStreamingProcess(
                     requestToURI[_requestId] = uri,
                     msg.sender,
                     startingTime,
