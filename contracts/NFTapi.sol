@@ -61,10 +61,7 @@ contract APILiquidWork is ChainlinkClient, ERC721URIStorage {
     }
 
 
-    /**
-     * Callback function
-     */
-
+    
      uint256 public newId;
      uint256 public counter;
 
@@ -88,6 +85,10 @@ contract APILiquidWork is ChainlinkClient, ERC721URIStorage {
 
         return newItemId;
     }
+
+    /**
+     * Callback function
+     */
 
     function fulfill(bytes32 _requestId, uint256 _realTime) public recordChainlinkFulfillment(_requestId)
     {
