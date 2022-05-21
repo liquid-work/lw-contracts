@@ -8,7 +8,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 
-contract APILiquidWork is ChainlinkClient, ERC721URIStorage {
+
+
+contract APIExperience is ChainlinkClient, ERC721URIStorage {
     using Chainlink for Chainlink.Request;
 
     uint256 public realTime; 
@@ -16,6 +18,18 @@ contract APILiquidWork is ChainlinkClient, ERC721URIStorage {
     address private oracle;
     bytes32 private jobId;
     uint256 private fee;
+
+    struct UserExperience {
+        string uri ;
+        address streamer;
+        uint256 startingTime;
+        uint256 endTime; 
+    }
+    
+    mapping(bytes32 => string) requestToURI ; 
+    mapping(bytes32 => address ) requestToSender;
+
+    UserExperience[] public experiences;
 
     // When TimeLeft == 0 emit this Event
     event ExperienceFinished(bytes32 firstName, bytes32 lastName, uint256 TimeLeft);
@@ -40,28 +54,10 @@ contract APILiquidWork is ChainlinkClient, ERC721URIStorage {
      */
 
 
-    function requesting() public 
-    {
-        Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
-        
-        // Set the URL to perform the GET request on
-        request.add("get", "http://worldtimeapi.org/api/timezone/America/New_York");
-        
-        // Set the path to find the desired data in the API response, where the response format is:
-    
-        request.add("path", "unixtime"); // add a nested path 
-        
-        // Multiply the result by 1000000000000000000 to remove decimals
-        int timesAmount = 10**18;
-        request.addInt("times", timesAmount);
-        
-        // Sends the request
-        sendChainlinkRequestTo(oracle, request, fee);
-        counter++;
-    }
+    /**
+     * Callback function
+     */
 
-
-    
      uint256 public newId;
      uint256 public counter;
 
@@ -86,16 +82,55 @@ contract APILiquidWork is ChainlinkClient, ERC721URIStorage {
         return newItemId;
     }
 
-    /**
-     * Callback function
-     */
+    function requesting(string memory uri) public returns (bytes32 requestId)
+    {
+        Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
+        
+        request.add("get", "http://worldtimeapi.org/api/timezone/America/New_York");    
+        request.add("path", "unixtime"); // add a nested path 
+        int timesAmount = 10**18;
+        request.addInt("times", timesAmount);
+        
+        // Sends the request
+        sendChainlinkRequestTo(oracle, request, fee);
+        return requestId = sendChainlinkRequest(request, fee);
+        requestToURI[requestId] = uri;
+        requestToSender[requestId] = msg.sender; 
+        counter++;
+    }
 
     function fulfill(bytes32 _requestId, uint256 _realTime) public recordChainlinkFulfillment(_requestId)
     {
+        uint256 newId = experiences.length;
+        uint256 startingTime;
+        uint256 endTime;
+        string memory uri;
+        
         if (counter==1){
             realTime = 0; 
+            uint256 startingTime = realTime;
+            experiences.push(
+                UserExperience(
+                    requestToURI[_requestId] = uri,
+                    msg.sender,
+                    startingTime,
+                    endTime
+                )
+            );
+
+        _safeMint(requestToSender[_requestId], newId);
+
         }else{
             realTime = _realTime;
+            uint256 endTime = realTime;
+            experiences.push(
+                UserExperience(
+                    requestToURI[_requestId] = uri,
+                    msg.sender,
+                    startingTime,
+                    endTime
+                ) 
+            );
         }
     
     }
@@ -104,7 +139,7 @@ contract APILiquidWork is ChainlinkClient, ERC721URIStorage {
         realTime = _realTime ;
     }
 
-    
+
 
 
 
