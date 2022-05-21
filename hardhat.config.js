@@ -2,14 +2,10 @@ require("dotenv").config();
 require("@nomiclabs/hardhat-truffle5");
 require("@nomiclabs/hardhat-ethers");
 
-const {
-  ALCHEMY_API_URL_KEY,
-  PRIVATE_KEY,
-  POLYSCAN_API_KEY
-} = process.env;
+const { ALCHEMY_API_URL_KEY, PRIVATE_KEY, POLYSCAN_API_KEY } = process.env;
 
 module.exports = {
-  defaultNetwork: "hardhat",
+  defaultNetwork: "mumbai",
   networks: {
     mumbai: {
       url: ALCHEMY_API_URL_KEY,
