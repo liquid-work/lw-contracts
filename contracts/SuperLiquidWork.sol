@@ -1,17 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
-pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {ISuperfluid, ISuperToken, ISuperAgreement, SuperAppDefinitions} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import {IConstantFlowAgreementV1} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IConstantFlowAgreementV1.sol";
 import {SuperAppBase} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperAppBase.sol";
 import "hardhat/console.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract SuperLiquidWork is SuperAppBase, Ownable {
     ISuperfluid private host;
-    // AggregatorV3Interface internal priceFeed;
 
     struct instance {
         address sender;
@@ -27,6 +24,7 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
         uint256 flowRate,
         uint256 deposit
     );
+
     event agreementTerminated(
         address sender,
         string instanceId,
@@ -169,22 +167,4 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
         require(msg.sender == address(host), "Support only one host");
         _;
     }
-    modifier onlySender(uint256 _serviceId) {
-        _;
-    }
-    modifier onlyReceiver(uint256 _serviceId) {
-        _;
-    }
-
-    // function getLatestPrice() public view returns (int256) {
-    //     (
-    //         ,
-    //         /*uint80 roundID*/
-    //         int256 price, /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/
-    //         ,
-    //         ,
-
-    //     ) = priceFeed.latestRoundData();
-    //     return price;
-    // }
 }
