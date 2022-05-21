@@ -6,8 +6,7 @@ const { Framework } = require("@superfluid-finance/sdk-core");
 const { expect } = require("chai");
 const { ethers, web3 } = require("hardhat");
 const daiABI = require("../abi/fDAIABI");
-
-const provider = web3;
+const { BigNumber } = require("ethers");
 
 let accounts;
 let deployedLW;
@@ -45,12 +44,11 @@ describe("Testing Deployment", () => {
 
     sf = await Framework.create({
       networkName: "custom",
-      provider: provider,
+      provider: web3,
       dataMode: "WEB3_ONLY",
       resolverAddress: process.env.RESOLVER_ADDRESS,
       protocolReleaseVersion: "test",
     });
-    console.log(sf);
 
     superSigner = await sf.createSigner({
       signer: signer,
@@ -76,6 +74,11 @@ describe("Testing Deployment", () => {
 });
 
 describe("Testing flows", async () => {
+  const deposit = ethers.utils.parseEther("1.0");
+  const flowRate = "100000000";
+  const instanceId = "testInstanceId";
+  const userData = web3.eth.abi.encodeParameter("string", instanceId);
+
   it("It upgrades dai", async () => {
     await dai
       .connect(signer)
@@ -95,19 +98,20 @@ describe("Testing flows", async () => {
       providerOrSigner: signer,
     });
     expect(daixBal).to.not.eq("0");
-    console.log(daixBal);
   });
 
-  it("User can stream money to SuperLiquidWork", async () => {
-    const flowRate = "100000000";
-    const instanceId = "testInstanceId";
-    const userData = web3.eth.abi.encodeParameter("string", instanceId);
-
-    const superTokenBalance = await daix.balanceOf({
-      account: signerAddress,
-      providerOrSigner: signer,
+  it("User can make a deposit", async () => {
+    await deployedLW.deposit("testInstanceId", {
+      value: deposit,
     });
-    console.log("superTokenBalance:", superTokenBalance);
+
+    const contractBalance = await ethers.provider.getBalance(
+      deployedLW.address
+    );
+    expect(contractBalance.eq(BigNumber.from(deposit)));
+  });
+
+  it("User can create a flow", async () => {
     const createFlowOperation = sf.cfaV1.createFlow({
       receiver: deployedLW.address,
       superToken: daix.address,
@@ -115,7 +119,38 @@ describe("Testing flows", async () => {
       userData,
     });
 
-    const txn = await createFlowOperation.exec(signer);
+    await createFlowOperation.exec(signer);
+    const senderFlowRate = await sf.cfaV1.getNetFlow({
+      account: signerAddress,
+      superToken: daix.address,
+      providerOrSigner: superSigner,
+    });
+    const appFlowRate = await sf.cfaV1.getNetFlow({
+      account: deployedLW.address,
+      superToken: daix.address,
+      providerOrSigner: superSigner,
+    });
+    expect(appFlowRate).to.eq(-senderFlowRate + "");
+  });
+
+  it("Smart contract emits agreementCreated event", async () => {
+    deployedLW.on("agreementCreated", (sender, id, fRate, amount) => {
+      expect(sender).to.eq(signerAddress);
+      expect(id).to.eq(instanceId);
+      expect(amount.eq(BigNumber.from(deposit)));
+    });
+  });
+
+  it("User can stop a flow", async () => {
+    const createFlowOperation = sf.cfaV1.deleteFlow({
+      receiver: deployedLW.address,
+      sender: signerAddress,
+      superToken: daix.address,
+      flowRate: flowRate,
+      userData,
+    });
+
+    await createFlowOperation.exec(signer);
 
     const senderFlowRate = await sf.cfaV1.getNetFlow({
       account: signerAddress,
@@ -127,15 +162,15 @@ describe("Testing flows", async () => {
       superToken: daix.address,
       providerOrSigner: superSigner,
     });
+    expect(appFlowRate).to.eq(senderFlowRate);
+  });
 
-    const appBalance = await daix.balanceOf({
-      account: deployedLW.address,
-      providerOrSigner: signer,
+  it("Smart contract emits agreementTerminated event", async () => {
+    deployedLW.on("agreementTerminated", (sender, id, fRate, amount) => {
+      expect(sender).to.eq(signerAddress);
+      expect(id).to.eq(instanceId);
+      expect(amount.eq(BigNumber.from(deposit)));
+      expect(fRate.eq(BigNumber.from(0)));
     });
-
-    console.log("appFlowRate:", appFlowRate);
-    console.log("senderFlowRate:", senderFlowRate);
-    console.log("appBalance after stream started", appBalance);
-    console.log("appBalance after stream terminated", appBalance);
   });
 });

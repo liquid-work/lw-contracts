@@ -9,32 +9,33 @@ import {SuperAppBase} from "@superfluid-finance/ethereum-contracts/contracts/app
 import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-
 contract SuperLiquidWork is SuperAppBase, Ownable {
     ISuperfluid private host;
-    AggregatorV3Interface internal priceFeed;
+    // AggregatorV3Interface internal priceFeed;
 
-
-    struct instanceFlowRate {
+    struct instance {
         address sender;
         uint256 flowRate;
+        uint256 deposit;
     }
-    mapping(string => instanceFlowRate) instances;
 
-    event agreementCreated(address sender, string instanceId, uint256 flowRate);
+    mapping(string => instance) private instances;
+
+    event agreementCreated(
+        address sender,
+        string instanceId,
+        uint256 flowRate,
+        uint256 deposit
+    );
     event agreementTerminated(
         address sender,
         string instanceId,
-        uint256 flowRate
+        uint256 flowRate,
+        uint256 deposit
     );
-
-    event noFunds(address sender, string instanceId, uint256 flowRate);
 
     constructor(ISuperfluid _host) {
         host = _host;
-        //Price feed for estimator 
-        priceFeed = AggregatorV3Interface(0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada); // MATIC/USD
-
 
         uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL |
             SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP |
@@ -43,6 +44,13 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
             SuperAppDefinitions.BEFORE_AGREEMENT_TERMINATED_NOOP;
 
         host.registerApp(configWord);
+    }
+
+    receive() external payable {}
+
+    function deposit(string calldata instanceId) external payable {
+        instances[instanceId] = instance(msg.sender, 0, msg.value);
+        payable(address(this)).transfer(msg.value);
     }
 
     /**************************************************************************
@@ -68,10 +76,20 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
             string memory instanceId,
             uint256 flowRate
         ) = decodeData(_agreementData, _ctx);
-        
-        newCtx = _ctx;
 
-        emit agreementCreated(sender, instanceId, flowRate); // -> nodejs server listens and deploys infrastructure
+        require(
+            instances[instanceId].deposit > 0,
+            "No deposit was made for that instance"
+        );
+
+        emit agreementCreated(
+            sender,
+            instanceId,
+            flowRate,
+            instances[instanceId].deposit
+        ); // -> nodejs server listens and deploys infrastructure
+
+        newCtx = _ctx;
     }
 
     function afterAgreementTerminated(
@@ -93,9 +111,14 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
             string memory instanceId,
             uint256 flowrate
         ) = decodeData(_agreementData, _ctx);
-        
+        emit agreementTerminated(
+            sender,
+            instanceId,
+            flowrate,
+            instances[instanceId].deposit
+        ); // -> nodejs server listens and destroys infrastructure
+        delete instances[instanceId];
         newCtx = _ctx;
-        emit agreementTerminated(sender, instanceId, flowrate); // -> nodejs server listens and destroys infrastructure
     }
 
     function decodeData(bytes memory _agreementData, bytes memory _ctx)
@@ -115,7 +138,8 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
             (string)
         );
 
-        instances[instanceIdData] = instanceFlowRate(senderData, flowRate);
+        instances[instanceIdData].sender = senderData;
+        instances[instanceIdData].flowRate = flowRate;
 
         return (senderData, instanceIdData, flowrate);
     }
@@ -152,14 +176,15 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
         _;
     }
 
-    function getLatestPrice() public view returns (int) {
-        (
-            /*uint80 roundID*/,
-            int price,
-            /*uint startedAt*/,
-            /*uint timeStamp*/,
-            /*uint80 answeredInRound*/
-        ) = priceFeed.latestRoundData();
-        return price;
-    }
+    // function getLatestPrice() public view returns (int256) {
+    //     (
+    //         ,
+    //         /*uint80 roundID*/
+    //         int256 price, /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/
+    //         ,
+    //         ,
+
+    //     ) = priceFeed.latestRoundData();
+    //     return price;
+    // }
 }
