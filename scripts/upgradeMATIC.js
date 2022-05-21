@@ -32,8 +32,39 @@ try {
   upgradeMATIC(100);
 } catch (error) {
   console.log("Error:", error);
+
 }
 
+async function downgradeToETH(amount){
+  const ethersProvider = new ethers.providers.JsonRpcProvider(
+    ALCHEMY_API_URL_KEY,
+    {
+      name: NETWORK_NAME,
+      chainId: networkConfigs[NETWORK_NAME],
+    }
+  );
+  const sf = await Framework.create({
+    networkName: NETWORK_NAME,
+    provider: ethersProvider,
+    chainId: networkConfigs[NETWORK_NAME],
+  });
+
+  const signer = sf.createSigner({
+    privateKey: PRIVATE_KEY,
+    provider: ethersProvider,
+  });
+  let maticx;
+  maticx = new ethers.Contract(MATICX_ADDRESS, MATICXABI, signer);
+  await maticx.connect(signer).({ value: amount });
+}
+try {
+  upgradeMATIC(100);
+} catch (error) {
+  console.log("Error:", error);
+
+}
+
+}
 
 
 

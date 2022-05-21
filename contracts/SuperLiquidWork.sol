@@ -21,6 +21,12 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
     }
     mapping(string => instanceFlowRate) instances;
 
+    struct management{
+        uint256 toSwap;
+        uint256 priceLimit;
+        
+    }
+
     event agreementCreated(address sender, string instanceId, uint256 flowRate);
     event agreementTerminated(
         address sender,
@@ -162,4 +168,22 @@ contract SuperLiquidWork is SuperAppBase, Ownable {
         ) = priceFeed.latestRoundData();
         return price;
     }
-}
+    
+    function checkUpkeep(bytes calldata checkData)
+        external
+        override
+        returns (bool upkeepNeeded, bytes memory performData)
+    {
+        upkeepNeeded = (block.timestamp - lastTimeStamp) > interval;
+
+        performData = checkData;
+    }
+
+    ///@notice Performing a swap for a limitPrice of MATIC 
+    function performUpkeep(bytes calldata performData) external override {
+        lastTimeStamp = block.timestamp;
+        
+        
+        performData;
+    }
+
