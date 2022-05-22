@@ -1,7 +1,7 @@
 const { Framework } = require("@superfluid-finance/sdk-core");
 const { ethers } = require("ethers");
 const networkConfigs = require("../network.configs");
-const MATICXABI = require("../abi/MATICX");
+const MATICXABI = require("../abi/MATICxABI");
 
 const { PRIVATE_KEY, ALCHEMY_API_URL_KEY, MATICX_ADDRESS, NETWORK_NAME } =
   process.env;
