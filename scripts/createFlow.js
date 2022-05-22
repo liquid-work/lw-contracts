@@ -3,7 +3,7 @@ const { BigNumber } = require("ethers");
 const { ethers } = require("hardhat");
 const ABI_LW =
   require("../artifacts/contracts/SuperLiquidWork.sol/SuperLiquidWork.json").abi;
-const ABI_MATICX = require("../abi/MATICxABI");
+const ABI_MATICX = require("../abi/MATICxABI.js");
 
 const { PRIVATE_KEY, ALCHEMY_API_URL_KEY, NETWORK_NAME } = process.env;
 const networkConfigs = require("../network.configs.js");
