@@ -11,13 +11,13 @@ async function upgradeMATIC(amount) {
     ALCHEMY_API_URL_KEY,
     {
       name: NETWORK_NAME,
-      chainId: networkConfigs[NETWORK_NAME],
+      chainId: networkConfigs[NETWORK_NAME].chainId,
     }
   );
   const sf = await Framework.create({
     networkName: NETWORK_NAME,
     provider: ethersProvider,
-    chainId: networkConfigs[NETWORK_NAME],
+    chainId: networkConfigs[NETWORK_NAME].chainId,
   });
 
   const signer = sf.createSigner({
@@ -29,7 +29,8 @@ async function upgradeMATIC(amount) {
   await maticx.connect(signer).upgradeByETH({ value: amount });
 }
 try {
-  upgradeMATIC(100);
+  const amountToUpgrade = ethers.utils.parseEther("0.2");
+  upgradeMATIC(amountToUpgrade);
 } catch (error) {
   console.log("Error:", error);
 }
@@ -55,10 +56,4 @@ async function downgradeToETH(amount) {
   let maticx;
   maticx = new ethers.Contract(MATICX_ADDRESS, MATICXABI, signer);
   await maticx.connect(signer).downgradeToETH({ value: amount });
-}
-
-try {
-  upgradeMATIC(100);
-} catch (error) {
-  console.log("Error:", error);
 }
