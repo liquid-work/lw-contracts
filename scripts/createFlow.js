@@ -59,11 +59,28 @@ const createFlow = async (
     flowRate: flowRate,
     userData,
   };
-  const createFlowOperation = sf.cfaV1.createFlow(options);
-  const maticxBalance = await maticx.getBalance(signerAddress);
-  console.log("maticxBalance:", maticxBalance);
 
+  
+
+  const createFlowOperation = sf.cfaV1.createFlow(options);
   await createFlowOperation.exec(superSigner);
+  //const maticxBalance = await maticx.realtimeBalanceOf(signerAddress);
+  //console.log("maticxBalance:", balanced);
+
+  const Mx = await sf.loadSuperToken(maticx.address);
+  console.log(Mx);
+
+  let balanced = await Mx.balanceOf({
+    account: signerAddress,
+    providerOrSigner: signer,
+  });
+
+
+  let x = await ethers.utils.formatEther(balanced);
+  console.log(`Your MaticX balance is ${x}.`);
+
+  
+
 };
 
 const ourContractAddress = "0x5098FfE333036bf8038D850d3D2F925eDF915110";
